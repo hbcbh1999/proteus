@@ -604,6 +604,22 @@ int MeshAdaptPUMIDrvr::getERMSizeField(double err_total)
   }
   m->end(it); 
 
+  //Get a refined band around the level set
+  apf::Field* phif = m->findField("phi");
+  assert(phif);
+  std::cout<<"Got the phi field\n";
+  it=m->begin(0);
+  while((v=m->iterate(it))){
+    double phi = apf::getScalar(phif,v,0);
+    double epsilon = 4.0* hmax; 
+    double originalValue = 2.0*hmin;
+    if(fabs(phi)<epsilon){
+      apf::setScalar(size_iso,v,0,originalValue);
+    }
+  }
+  m->end(it);
+  
+
   //Get the anisotropic size frame
   if(adapt_type_config=="anisotropic"){
     size_scale = apf::createLagrangeField(m, "proteus_size_scale", apf::VECTOR, 1);
