@@ -611,8 +611,8 @@ int MeshAdaptPUMIDrvr::getERMSizeField(double err_total)
   it=m->begin(0);
   while((v=m->iterate(it))){
     double phi = apf::getScalar(phif,v,0);
-    double epsilon = 4.0* hmax; 
-    double originalValue = 2.0*hmin;
+    double epsilon = 3.0* hmax; 
+    double originalValue = 10.0*hmin;
     if(fabs(phi)<epsilon){
       apf::setScalar(size_iso,v,0,originalValue);
     }
