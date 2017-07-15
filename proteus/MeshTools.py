@@ -6287,9 +6287,9 @@ class MeshOptions:
             layers of overlap for paralllel (default: 0)
         """
         if partitioning_type == 'element' or partitioning_type == 0:
-            self.parallelPartitioningType = mpt.element
+            self.parallelPartitioningType = MeshParallelPartitioningTypes.element
         if partitioning_type == 'node' or partitioning_type == 1:
-            self.parallelPartitioningType = mpt.node
+            self.parallelPartitioningType = MeshParallelPartitioningTypes.node
         self.nLayersOfOverlapForParallel = layers_overlap
 
     def setTriangleOptions(self, triangle_options=None):
@@ -6381,7 +6381,7 @@ def msh2simplex(fileprefix, nd):
     switch = None
     switch_count = -1
     logEvent('msh2simplex: getting nodes and elements')
-    for line in mshfile:
+    for i, line in enumerate(mshfile):
         if 'Nodes' in line:
             switch = 'nodes'
             switch_count = -1
@@ -6418,6 +6418,11 @@ def msh2simplex(fileprefix, nd):
                 elif el_type == 2: # triangle
                     triangle_nb += 1
                     triangles += [[triangle_nb, int(words[s]), int(words[s+1]), int(words[s+2]), flag]]
+                    # update nodes flags
+                    if nd == 3:
+                        for i in range(3):
+                            if nodes[int(words[s+i])-1][4] == 0:
+                                nodes[int(words[s+i])-1][4] = flag
                 elif el_type == 4: # tetrahedron 
                     tetrahedron_nb += 1
                     tetrahedra += [[tetrahedron_nb, int(words[s]), int(words[s+1]), int(words[s+2]), int(words[s+3]), flag]]
