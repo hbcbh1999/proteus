@@ -759,11 +759,6 @@ int MeshAdaptPUMIDrvr::reconstructFromProteus(Mesh& mesh, Mesh& globalMesh,int h
       nBoundaryNodes++;
     }    
   }
-  int nInteriorBoundaries=0;
-  for(int i=0;i<mesh.nInteriorElementBoundaries_global;i++){
-    if(mesh.elementBoundaryMaterialTypes[i]>0)
-      nInteriorBoundaries++;
-  }
 
   int numDim;
   if(mesh.nNodes_element==3)
@@ -786,7 +781,7 @@ int MeshAdaptPUMIDrvr::reconstructFromProteus(Mesh& mesh, Mesh& globalMesh,int h
   else{
     numModelNodes = nBoundaryNodes;
     numModelEdges = mesh.nEdges_global;
-    numModelBoundaries = mesh.nExteriorElementBoundaries_global+nInteriorBoundaries;
+    numModelBoundaries = mesh.nExteriorElementBoundaries_global;
     numModelRegions = numModelEntities[3];
   }
 
@@ -1066,19 +1061,11 @@ int MeshAdaptPUMIDrvr::reconstructFromProteus(Mesh& mesh, Mesh& globalMesh,int h
         //get to the next item in the exterior array
         if(m->isShared(ent) && mesh.elementBoundaryMaterialTypes[mesh.exteriorElementBoundariesArray[edgCounter]]==0) 
           edgCounter++; 
-        //If the edge has a non-zero boundary material, then it must be an interior edge
-        if(mesh.elementBoundaryMaterialTypes[edgID]!=0){
-          //std::cout<<"centroid of edge? "<<apf::getLinearCentroid(m,ent)<<" material? "<<mesh.elementBoundaryMaterialTypes[edgID]<<std::endl;
-          gEnt = m->findModelEntity(1,edgMaterialCounter);
-          modelBoundaryMaterial[edgMaterialCounter] = mesh.elementBoundaryMaterialTypes[edgID]; 
-          edgMaterialCounter++;
-        }
+        assert(mesh.elementBoundaryMaterialTypes[edgID]==0);
         //There are always two entities adjacent to an element boundary
         //Pick one and take that as the material type for classification
-        else{
-          matTag = mesh.elementMaterialTypes[mesh.elementBoundaryElementsArray[2*edgID]];
-          gEnt = m->findModelEntity(2,matTag);
-        }
+        matTag = mesh.elementMaterialTypes[mesh.elementBoundaryElementsArray[2*edgID]];
+        gEnt = m->findModelEntity(2,matTag);
       }
     }
     m->setModelEntity(ent,gEnt);
