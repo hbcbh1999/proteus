@@ -608,16 +608,18 @@ int MeshAdaptPUMIDrvr::getERMSizeField(double err_total)
   apf::Field* phif = m->findField("phi");
   assert(phif);
   std::cout<<"Got the phi field\n";
+/*
   it=m->begin(0);
   while((v=m->iterate(it))){
     double phi = apf::getScalar(phif,v,0);
-    double epsilon = 3.0* hmax; 
+    double epsilon = 2.0* hmax; 
     double originalValue = 10.0*hmin;
     if(fabs(phi)<epsilon){
       apf::setScalar(size_iso,v,0,originalValue);
     }
   }
   m->end(it);
+*/
   
 
   //Get the anisotropic size frame
@@ -704,8 +706,33 @@ int MeshAdaptPUMIDrvr::getERMSizeField(double err_total)
     if(target_element_count!=0){
       sam::scaleIsoSizeField(size_iso, target_element_count);
       clampField(size_iso,hmin,hmax);
-      SmoothField(size_iso);
+
+    double err_h_max=hmax;
+    for(int its=0;its<100;its++)
+      {
+       its++;
+       SmoothField(size_iso);
+       apf::synchronize(size_iso);
+       it = m->begin(0);
+       while ((v = m->iterate(it))) {
+        double phi = apf::getScalar(phif, v, 0);
+        double size_current = apf::getScalar(size_iso, v, 0);
+        double size = size_current;
+        double hvof = 0.03;
+        if(fabs(phi)<30.0*hvof)
+          size = (30.0*hvof-fabs(phi))/(30.0*hvof)*(hvof)+fabs(phi)/(30.0*hvof)*3*hvof;
+        size = fmin(size_current,size);
+        apf::setScalar(size_iso, v, 0, size);
+       }
+       m->end(it);
+     }    
+     apf::synchronize(size_iso);
     }
+  }
+  if(logging_config=="on"){
+    char namebuffer[20];
+    sprintf(namebuffer,"pumi_preadapt_%i",nAdapt);
+    apf::writeVtkFiles(namebuffer, m);
   }
 
   //Destroy locally required fields

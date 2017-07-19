@@ -908,6 +908,8 @@ class NS_base:  # (HasTraits):
             
             p0.domain.PUMIMesh.transferModelInfo(numModelEntities,segmentList,newFacetList,mesh2Model_v,mesh2Model_e,mesh2Model_b)
             p0.domain.PUMIMesh.reconstructFromProteus(self.modelList[0].levelModelList[0].mesh.cmesh,self.modelList[0].levelModelList[0].mesh.globalMesh.cmesh,p0.domain.hasModel)
+        if self.tn > 8.0:
+          n0.adaptMesh_nSteps=1
         if (hasattr(p0.domain, 'PUMIMesh') and
             n0.adaptMesh and
             self.so.useOneMesh and 

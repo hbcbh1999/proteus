@@ -356,11 +356,13 @@ int MeshAdaptPUMIDrvr::adaptPUMIMesh()
     std::cerr << "unknown size field config " << size_field_config << '\n';
     abort();
   }
+/*
   if(logging_config=="on"){
     char namebuffer[20];
     sprintf(namebuffer,"pumi_preadapt_%i",nAdapt);
     apf::writeVtkFiles(namebuffer, m);
   }
+*/
 
   // These are relics from an attempt to pass BCs from proteus into the error estimator.
   // They maybe useful in the future.
