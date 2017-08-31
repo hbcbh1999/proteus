@@ -1738,6 +1738,9 @@ namespace proteus
 			   double* velocityError,
 			   double* velocityErrorNodal)
     {
+      std::cout<<"I MUST BE HERE\n";
+      //int eN_desired = 2377;
+      int eN_desired = 2;
       //
       //loop over elements to compute volume integrals and load them into element and global residual
       //
@@ -1917,6 +1920,18 @@ namespace proteus
 		  for (int I=0;I<nSpace;I++)
 		    {
 		      p_grad_test_dV[j*nSpace+I]   = p_grad_trial[j*nSpace+I]*dV;//cek warning won't work for Petrov-Galerkin
+//*
+          if(eN==eN_desired && I==0 && j==0){
+            std::cout<<"p_grad_test_dv for "<<k<<" "<< p_grad_trial[j*nSpace+I]<<" "<<dV<<" "<<fabs(jacDet)<<" "<<dV_ref[k]<<std::endl;
+          }
+//*/
+/*
+          if(eN==2 && I==0 && j==0){
+            std::cout<<"p_grad_test_dv for "<<k<<" "<< p_grad_trial[j*nSpace+I]<<" "<<dV<<" "<<fabs(jacDet)<<" "<<dV_ref[k]<<std::endl;
+          }
+*/
+
+
 		      vel_grad_test_dV[j*nSpace+I] = vel_grad_trial[j*nSpace+I]*dV;//cek warning won't work for Petrov-Galerkin
 		    }
 		}
@@ -2234,6 +2249,17 @@ namespace proteus
 		  register int i_nSpace = i*nSpace;
 		  Lstar_u_p[i]=ck.Advection_adjoint(dmass_adv_u,&p_grad_test_dV[i_nSpace]);
 		  Lstar_v_p[i]=ck.Advection_adjoint(dmass_adv_v,&p_grad_test_dV[i_nSpace]);
+/*
+      if(i==0 && eN==2){
+        std::cout<<"Lstar_v_p at "<<k<<" "<<dmass_adv_v[0]<<" "<<dmass_adv_v[1]<<" "<<p_grad_test_dV[i_nSpace]<<std::endl;
+      }
+*/
+//*
+      if(i==0 && eN==eN_desired){
+        std::cout<<"Lstar_v_p at "<<k<<" "<<dmass_adv_v[0]<<" "<<dmass_adv_v[1]<<" "<<p_grad_test_dV[i_nSpace]<<std::endl;
+      }
+//*/
+
 		  /* Lstar_w_p[i]=ck.Advection_adjoint(dmass_adv_w,&p_grad_test_dV[i_nSpace]); */
                   //use the same advection adjoint for all three since we're approximating the linearized adjoint
 		  Lstar_u_u[i]=ck.Advection_adjoint(dmom_adv_star,&vel_grad_test_dV[i_nSpace]);
@@ -2271,7 +2297,25 @@ namespace proteus
 		  elementResidual_mesh[i] += ck.Reaction_weak(1.0,p_test_dV[i]) -
                     ck.Reaction_weak(1.0,p_test_dV[i]*q_dV_last[eN_k]/dV) -
                     ck.Advection_weak(mesh_vel,&p_grad_test_dV[i_nSpace]);
-                  
+/*                  
+       if(i == 0 && eN== 2){
+          std::cout<<"quadrature "<<k<<" current "<<elementResidual_p[i]<<" components "<<ck.Advection_weak(mass_adv,&p_grad_test_dV[i_nSpace])<<" start moving "<<DM*MOVING_DOMAIN<<" "<<ck.Reaction_weak(alphaBDF*1.0,p_test_dV[i])<<" "<<ck.Reaction_weak(alphaBDF*1.0,p_test_dV[i]*q_dV_last[eN_k]/dV)<<" "<<ck.Advection_weak(mesh_vel,&p_grad_test_dV[i_nSpace])<<" end moving"<<ck.Reaction_weak(mass_source,p_test_dV[i])<<" "<<ck.SubgridError(subgridError_u,Lstar_u_p[i])<<" "<<ck.SubgridError(subgridError_v,Lstar_v_p[i])<<std::endl;
+
+       }
+*/
+/*
+       if(i == 0 && eN== 2){
+          std::cout<<"quadrature "<<k<<" current "<<elementResidual_p[i]<<" components "<<ck.Advection_weak(mass_adv,&p_grad_test_dV[i_nSpace])<<" "<<ck.Reaction_weak(mass_source,p_test_dV[i])<<" "<<ck.SubgridError(subgridError_u,Lstar_u_p[i])<<" "<<ck.SubgridError(subgridError_v,Lstar_v_p[i])<<" subgrid error comps "<<subgridError_v<<" "<<Lstar_v_p[i]<<std::endl;
+
+       }
+*/
+//*
+       if(i == 0 && eN==eN_desired){
+          std::cout<<"quadrature "<<k<<" current "<<elementResidual_p[i]<<" components "<<ck.Advection_weak(mass_adv,&p_grad_test_dV[i_nSpace])<<" "<<ck.Reaction_weak(mass_source,p_test_dV[i])<<" "<<ck.SubgridError(subgridError_u,Lstar_u_p[i])<<" "<<ck.SubgridError(subgridError_v,Lstar_v_p[i])<<" subgrid error comps "<<subgridError_v<<" "<<Lstar_v_p[i]<<std::endl;
+
+       }
+//*/
+
 		  elementResidual_p[i] += ck.Advection_weak(mass_adv,&p_grad_test_dV[i_nSpace]) +
 		    DM*MOVING_DOMAIN*(ck.Reaction_weak(alphaBDF*1.0,p_test_dV[i]) -
                                       ck.Reaction_weak(alphaBDF*1.0,p_test_dV[i]*q_dV_last[eN_k]/dV) -
@@ -2323,6 +2367,13 @@ namespace proteus
 	  for(int i=0;i<nDOF_test_element;i++) 
 	    { 
 	      register int eN_i=eN*nDOF_test_element+i;
+        //if(offset_u+stride_u*vel_l2g[eN_i]==459){
+        if(offset_p+stride_p*p_l2g[eN_i]==459){
+          std::cout<<"target identified "<<" "<<p_l2g[eN_i]<<" "<<i<<" "<<eN<<" elementResidual_p "<<elementResidual_p[i]<<" global "<<globalResidual[offset_p+stride_p*p_l2g[eN_i]]<<std::endl;
+        }
+        if(offset_p+stride_p*p_l2g[eN_i]==3564){
+          std::cout<<"target identified "<<" "<<p_l2g[eN_i]<<" "<<i<<" "<<eN<<" elementResidual_p "<<elementResidual_p[i]<<" global "<<globalResidual[offset_p+stride_p*p_l2g[eN_i]]<<std::endl;
+        }
 	      velocityErrorNodal[p_l2g[eN_i]]+= velocityErrorElement[i];
 	      elementResidual_p_save[eN_i] +=  elementResidual_p[i];
               mesh_volume_conservation_element_weak += elementResidual_mesh[i];
@@ -3156,7 +3207,13 @@ namespace proteus
 	  for (int i=0;i<nDOF_test_element;i++)
 	    {
 	      int eN_i = eN*nDOF_test_element+i;
-	      
+        if(offset_p+stride_p*p_l2g[eN_i]==459){
+          std::cout<<"target boundary identified "<<" "<<p_l2g[eN_i]<<" "<<i<<" "<<eN<<" boundary elementResidual_p "<<elementResidual_p[i]<<" global "<<globalResidual[offset_p+stride_p*p_l2g[eN_i]]<<std::endl;
+        }
+        if(offset_p+stride_p*p_l2g[eN_i]==3564){
+          std::cout<<"target boundary identified "<<" "<<p_l2g[eN_i]<<" "<<i<<" "<<eN<<" boundary elementResidual_p "<<elementResidual_p[i]<<" global "<<globalResidual[offset_p+stride_p*p_l2g[eN_i]]<<std::endl;
+        }
+
 	      elementResidual_p_save[eN_i] +=  elementResidual_p[i];
               mesh_volume_conservation_weak += elementResidual_mesh[i];		  
 	      globalResidual[offset_p+stride_p*p_l2g[eN_i]]+=elementResidual_p[i];

@@ -21,6 +21,7 @@ from distutils import sysconfig
 cv = sysconfig.get_config_vars()
 cv["CFLAGS"] = cv["CFLAGS"].replace("-DNDEBUG","")
 cv["CFLAGS"] = cv["CFLAGS"].replace("-O3","")
+cv["CFLAGS"] = cv["CFLAGS"].replace("-O2","-gdwarf-3")
 cv["CFLAGS"] = cv["CFLAGS"].replace("-Wall","-w")
 cv["CFLAGS"] = cv["CFLAGS"].replace("-Wstrict-prototypes","")
 

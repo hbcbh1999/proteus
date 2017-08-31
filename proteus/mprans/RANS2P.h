@@ -1745,6 +1745,7 @@ namespace proteus
 			   double* velocityError,
 			   double* velocityErrorNodal)
     {
+      std::cout<<"Is this the real life?!!!!\n";
       //
       //loop over elements to compute volume integrals and load them into element and global residual
       //
@@ -1753,6 +1754,9 @@ namespace proteus
         mesh_volume_conservation_err_max=0.0,
         mesh_volume_conservation_err_max_weak=0.0;
       double globalConservationError=0.0;
+
+      //printf("TIME TO ATTACH GDB\n");
+      //getchar();
       for(int eN=0;eN<nElements_global;eN++)
 	{
 	  //declare local storage for element residual and initialize
@@ -2326,6 +2330,10 @@ namespace proteus
 	  for(int i=0;i<nDOF_test_element;i++) 
 	    { 
 	      register int eN_i=eN*nDOF_test_element+i;
+        std::cout<<"Is this the real life?\n";
+        if(offset_u+stride_u*vel_l2g[eN_i] == 460){
+          std::cout<<"The element is "<<eN_i<<" of "<<i<<std::endl;
+        }
 
 	      elementResidual_p_save[eN_i] +=  elementResidual_p[i];
               mesh_volume_conservation_element_weak += elementResidual_mesh[i];

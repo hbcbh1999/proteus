@@ -4859,7 +4859,7 @@ int partitionElements(Mesh& mesh, int nElements_overlap)
               }
           }//edges
     }
-
+  std::cout<<"Are the nElements_overlap > 0? "<<nElements_overlap<<std::endl;
   if (nElements_overlap > 0)
     {
       //get all elements in the node stars and their nodes

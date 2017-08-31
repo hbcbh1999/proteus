@@ -1177,6 +1177,10 @@ class NS_base:  # (HasTraits):
             m.attachModels(self.modelList)
             if index not in self.modelSpinUp:
                 spinup.append((self.pList[index],self.nList[index],m,self.simOutputList[index]))
+
+        #if(self.comm.rank()==0):
+        #  from pdb_clone import pdb; pdb.set_trace_remote()
+
         for m in self.modelList:
             for lm,lu,lr in zip(m.levelModelList,
                                 m.uList,
@@ -1359,6 +1363,9 @@ class NS_base:  # (HasTraits):
                                 logEvent("Model substep t=%12.5e for model %s" % (self.tSubstep,model.name),level=3)
                                 #TODO: model.stepController.substeps doesn't seem to be updated after a solver failure unless model.stepController.stepExact is true
                                 logEvent("Model substep t=%12.5e for model %s model.timeIntegration.t= %12.5e" % (self.tSubstep,model.name,model.levelModelList[-1].timeIntegration.t),level=3)
+                                #if (self.comm.rank()==0):
+                                #  from pdb_clone import pdb; pdb.set_trace_remote()
+                                #self.comm.barrier()
 
                                 model.stepController.setInitialGuess(model.uList,model.rList)
 

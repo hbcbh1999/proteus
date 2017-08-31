@@ -442,9 +442,24 @@ class Newton(NonlinearSolver):
 
         import Viewers
         memory()
+        import Comm 
+        comm = Comm.get()
+        if (comm.rank()==1):
+          from pdb_clone import pdb; pdb.set_trace_remote()
+        comm.barrier()
+
         if self.linearSolver.computeEigenvalues:
             self.u0[:]=u
+        if par_u is not None:
+          par_u.scatter_forward_insert()
+        if(comm.rank()==0):
+          r.tofile("newresidual0.txt",sep="\n")
+          u.tofile("u0.txt",sep="\n")
+        if(comm.rank()==1):
+          u.tofile("u1.txt",sep="\n")
         r=self.solveInitialize(u,r,b)
+        if(comm.rank()==0):
+          r.tofile("newresidual0_after.txt",sep="\n")
         if par_u is not None:
             #allow linear solver to know what type of assembly to use
             self.linearSolver.par_fullOverlap = self.par_fullOverlap
@@ -455,6 +470,9 @@ class Newton(NonlinearSolver):
                 #no overlap or overlap (until we compute norms over only owned dof)
                 par_r.scatter_forward_insert()
 
+        if(comm.rank()==0):
+          r.tofile("newresidual0_afterScatter.txt",sep="\n")
+        exit()
         self.norm_r0 = self.norm(r)
         self.norm_r_hist = []
         self.norm_du_hist = []
