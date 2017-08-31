@@ -4,6 +4,7 @@
 #include <iostream>
 #include "CompKernel.h"
 #include "ModelFactory.h"
+#include <iomanip>
 //#define COMPRESSIBLE_FORM
 const  double DM=0.0;//1-mesh conservation and divergence, 0 - weak div(v) only
 const  double DM2=0.0;//1-point-wise mesh volume strong-residual, 0 - div(v) only
@@ -1740,8 +1741,9 @@ namespace proteus
     {
       std::cout<<"I MUST BE HERE\n";
       //int eN_desired = 2377;
-      //int eN_desired = 24; //relevant element for nodal partitioning
-      int eN_desired = 2;//element part no overlap
+      int eN_desired = 24; //relevant element for nodal partitioning
+      //int eN_desired = 2;//element part no overlap
+      std::cout<<std::setprecision(15);
       //
       //loop over elements to compute volume integrals and load them into element and global residual
       //
