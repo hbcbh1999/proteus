@@ -1499,7 +1499,7 @@ class LevelModel(proteus.Transport.OneLevelTransport):
             #        pass
             #      #if(fileObj):
             #      #  fileObj.close()
-        #if (self.comm.rank()==1):
+        #if (self.comm.rank()==0):
         #  from pdb_clone import pdb; pdb.set_trace_remote()
         #self.comm.barrier()
         if(self.comm.rank()==1):

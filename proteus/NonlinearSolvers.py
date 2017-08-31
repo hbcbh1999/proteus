@@ -444,9 +444,9 @@ class Newton(NonlinearSolver):
         memory()
         import Comm 
         comm = Comm.get()
-        if (comm.rank()==1):
-          from pdb_clone import pdb; pdb.set_trace_remote()
-        comm.barrier()
+        #if (comm.rank()==1):
+        #  from pdb_clone import pdb; pdb.set_trace_remote()
+        #comm.barrier()
 
         if self.linearSolver.computeEigenvalues:
             self.u0[:]=u

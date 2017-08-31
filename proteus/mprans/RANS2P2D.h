@@ -1740,7 +1740,8 @@ namespace proteus
     {
       std::cout<<"I MUST BE HERE\n";
       //int eN_desired = 2377;
-      int eN_desired = 2;
+      //int eN_desired = 24; //relevant element for nodal partitioning
+      int eN_desired = 2;//element part no overlap
       //
       //loop over elements to compute volume integrals and load them into element and global residual
       //
@@ -1866,6 +1867,8 @@ namespace proteus
 		//
 		G[nSpace*nSpace],G_dd_G,tr_G,norm_Rv,h_phi, dmom_adv_star[nSpace],dmom_adv_sge[nSpace];
 	      //get jacobian, etc for mapping reference element
+
+
 	      ck.calculateMapping_element(eN,
 					  k,
 					  mesh_dof,
@@ -1889,6 +1892,20 @@ namespace proteus
 						  mesh_l2g,
 						  mesh_trial_ref,
 						  xt,yt,zt);
+
+  if(eN==eN_desired){
+  std::cout<<"components for element mapping " << k<<" "<<x<<" "<<y<<" "<<z<<" "<<jacDet<<std::endl;
+  std::cout<<"Jacobian "<<jac[0]<<" "<<jac[1]<<" "<<jac[2]<<" "<<jac[3]<<" "<<jac[4]<<" "<<jac[5]<<" "<<jac[6]<<" "<<jac[7]<<" "<<jac[8]<<std::endl;
+    for (int jdx=0;jdx<3;jdx++)
+      {
+	int eN_j=eN*3+jdx;
+  std::cout<<mesh_dof[mesh_l2g[eN_j]*3+0]*mesh_grad_trial_ref[k*3*3+jdx*3+0]<<" "<<mesh_dof[mesh_l2g[eN_j]*3+0]*mesh_grad_trial_ref[k*3*3+jdx*3+1]<<" "<<mesh_dof[mesh_l2g[eN_j]*3+0]*mesh_grad_trial_ref[k*3*3+jdx*3+2]<<std::endl;
+  std::cout<<mesh_dof[mesh_l2g[eN_j]*3+1]*mesh_grad_trial_ref[k*3*3+jdx*3+0]<<" "<<mesh_dof[mesh_l2g[eN_j]*3+1]*mesh_grad_trial_ref[k*3*3+jdx*3+1]<<" "<<mesh_dof[mesh_l2g[eN_j]*3+1]*mesh_grad_trial_ref[k*3*3+jdx*3+2]<<std::endl;
+  std::cout<<mesh_dof[mesh_l2g[eN_j]*3+2]*mesh_grad_trial_ref[k*3*3+jdx*3+0]<<" "<<mesh_dof[mesh_l2g[eN_j]*3+2]*mesh_grad_trial_ref[k*3*3+jdx*3+1]<<" "<<mesh_dof[mesh_l2g[eN_j]*3+2]*mesh_grad_trial_ref[k*3*3+jdx*3+2]<<std::endl;
+    }
+  }
+
+
 	      //xt=0.0;yt=0.0;zt=0.0;
 	      //std::cout<<"xt "<<xt<<'\t'<<yt<<'\t'<<zt<<std::endl;
 	      //get the physical integration weight
@@ -1923,6 +1940,10 @@ namespace proteus
 //*
           if(eN==eN_desired && I==0 && j==0){
             std::cout<<"p_grad_test_dv for "<<k<<" "<< p_grad_trial[j*nSpace+I]<<" "<<dV<<" "<<fabs(jacDet)<<" "<<dV_ref[k]<<std::endl;
+            std::cout<<"What is the pressure? "<<p<<" grad "<<grad_p[0]<<" "<<grad_p[1]<<std::endl;
+            for(int idx=0;idx<7;idx++){
+              std::cout<<"grad trial ref construction " << idx<<" "<<p_grad_trial_ref[k*nDOF_trial_element*nSpace]<<" "<<jacInv[idx]<<std::endl; //careful since grad-trial ref is an array
+            }
           }
 //*/
 /*
@@ -2368,6 +2389,9 @@ namespace proteus
 	    { 
 	      register int eN_i=eN*nDOF_test_element+i;
         //if(offset_u+stride_u*vel_l2g[eN_i]==459){
+        if(offset_p+stride_p*p_l2g[eN_i]==27){
+          std::cout<<"target identified "<<" "<<p_l2g[eN_i]<<" "<<i<<" "<<eN<<" elementResidual_p "<<elementResidual_p[i]<<" global "<<globalResidual[offset_p+stride_p*p_l2g[eN_i]]<<std::endl;
+        }
         if(offset_p+stride_p*p_l2g[eN_i]==459){
           std::cout<<"target identified "<<" "<<p_l2g[eN_i]<<" "<<i<<" "<<eN<<" elementResidual_p "<<elementResidual_p[i]<<" global "<<globalResidual[offset_p+stride_p*p_l2g[eN_i]]<<std::endl;
         }
