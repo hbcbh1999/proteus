@@ -472,7 +472,7 @@ class Newton(NonlinearSolver):
 
         if(comm.rank()==0):
           r.tofile("newresidual0_afterScatter.txt",sep="\n")
-        exit()
+        #exit()
         self.norm_r0 = self.norm(r)
         self.norm_r_hist = []
         self.norm_du_hist = []

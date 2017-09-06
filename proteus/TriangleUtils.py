@@ -119,7 +119,7 @@ def printNodeFile(nodes,filebase='mesh',attrib=None,markers=None,nbase=0):
     line = """%d %d %d %d \n""" % (nvert,sdim,nattrib,nmarkers)
     nout.write(line)
     for i in range(nvert):
-        line = """%d %g %g """ % (nbase+i,nodes[i,0],nodes[i,1])
+        line = """%d %.15f %.15f """ % (nbase+i,nodes[i,0],nodes[i,1])
         for j in range(nattrib):
             line +=""" %g """ % attrib[i,j]
         #end j

@@ -1741,8 +1741,8 @@ namespace proteus
     {
       std::cout<<"I MUST BE HERE\n";
       //int eN_desired = 2377;
-      int eN_desired = 24; //relevant element for nodal partitioning
-      //int eN_desired = 2;//element part no overlap
+      //int eN_desired = 24; //relevant element for nodal partitioning
+      int eN_desired = 2;//element part no overlap
       std::cout<<std::setprecision(15);
       //
       //loop over elements to compute volume integrals and load them into element and global residual
@@ -1901,9 +1901,11 @@ namespace proteus
     for (int jdx=0;jdx<3;jdx++)
       {
 	int eN_j=eN*3+jdx;
-  std::cout<<mesh_dof[mesh_l2g[eN_j]*3+0]*mesh_grad_trial_ref[k*3*3+jdx*3+0]<<" "<<mesh_dof[mesh_l2g[eN_j]*3+0]*mesh_grad_trial_ref[k*3*3+jdx*3+1]<<" "<<mesh_dof[mesh_l2g[eN_j]*3+0]*mesh_grad_trial_ref[k*3*3+jdx*3+2]<<std::endl;
+  std::cout<<mesh_dof[mesh_l2g[eN_j]*3+0]<<" "<<mesh_grad_trial_ref[k*3*3+jdx*3+0]<<" "<<mesh_dof[mesh_l2g[eN_j]*3+0]<<" "<<mesh_grad_trial_ref[k*3*3+jdx*3+1]<<" "<<mesh_dof[mesh_l2g[eN_j]*3+0]<<" "<<mesh_grad_trial_ref[k*3*3+jdx*3+2]<<std::endl;
+/*
   std::cout<<mesh_dof[mesh_l2g[eN_j]*3+1]*mesh_grad_trial_ref[k*3*3+jdx*3+0]<<" "<<mesh_dof[mesh_l2g[eN_j]*3+1]*mesh_grad_trial_ref[k*3*3+jdx*3+1]<<" "<<mesh_dof[mesh_l2g[eN_j]*3+1]*mesh_grad_trial_ref[k*3*3+jdx*3+2]<<std::endl;
   std::cout<<mesh_dof[mesh_l2g[eN_j]*3+2]*mesh_grad_trial_ref[k*3*3+jdx*3+0]<<" "<<mesh_dof[mesh_l2g[eN_j]*3+2]*mesh_grad_trial_ref[k*3*3+jdx*3+1]<<" "<<mesh_dof[mesh_l2g[eN_j]*3+2]*mesh_grad_trial_ref[k*3*3+jdx*3+2]<<std::endl;
+*/
     }
   }
 

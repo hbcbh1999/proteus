@@ -1502,8 +1502,8 @@ class LevelModel(proteus.Transport.OneLevelTransport):
         #if (self.comm.rank()==0):
         #  from pdb_clone import pdb; pdb.set_trace_remote()
         #self.comm.barrier()
-        if(self.comm.rank()==1):
-          self.rans2p.calculateResidual(#element
+        #if(self.comm.rank()==1):
+        self.rans2p.calculateResidual(#element
             self.u[0].femSpace.elementMaps.psi,
             self.u[0].femSpace.elementMaps.grad_psi,
             self.mesh.nodeArray,

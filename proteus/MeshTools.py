@@ -581,6 +581,9 @@ class Mesh:
         self.comm=comm
         logEvent(memory("partitionMesh 1","MeshTools"),level=4)
         logEvent("Partitioning mesh among %d processors using partitioningType = %d" % (comm.size(),parallelPartitioningType))
+        #if (comm.rank()==1):
+        #  from pdb_clone import pdb; pdb.set_trace_remote()
+      
         self.subdomainMesh=self.__class__()
         self.subdomainMesh.globalMesh = self
         self.subdomainMesh.cmesh=cmeshTools.CMesh()
@@ -632,6 +635,7 @@ class Mesh:
                                                  nghosts=self.subdomainMesh.nNodes_global - self.subdomainMesh.nNodes_owned,
                                                  subdomain2global=self.nodeNumbering_subdomain2global)
         par_nodeDiametersArray.scatter_forward_insert()
+
         # comm.beginSequential()
         # from Profiling import memory
         # memory()

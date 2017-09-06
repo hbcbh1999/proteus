@@ -1302,15 +1302,24 @@ class NS_base:  # (HasTraits):
         #adaptively, to the time in the stepSequence. Lastly there is
         #a loop for substeps(stages).
 
-       # for p,n,m,simOutput,index in zip(self.pList,self.nList,self.modelList,self.simOutputList,range(len(self.pList))):
-       #   for lm,lu,lr in zip(m.levelModelList,
-       #                         m.uList,
-       #                         m.rList):
-       #     lm.getResidual(lu,lr)
-       #     print "Initial Field \n %s" % lu
-       #     print "Initial Residual \n %s" % lr
-       #     print "Min / Max residual %s / %s" %(lr.min(),lr.max())
+        for p,n,m,simOutput,index in zip(self.pList,self.nList,self.modelList,self.simOutputList,range(len(self.pList))):
+          for lm,lu,lr in zip(m.levelModelList,
+                                m.uList,
+                                m.rList):
+            lm.getResidual(lu,lr)
+            #print "Initial Field \n %s" % lu
+            #print "Initial Residual \n %s" % lr
+            #print "Min / Max residual %s / %s" %(lr.min(),lr.max())
+            if(self.comm.rank()==0):
+              #from pdb_clone import pdb; pdb.set_trace_remote()
+              fileString = "residualTests/"+p.name+"_r.txt"
+              fileString2 = "residualTests/"+p.name+"_u.txt"
+              #fileID = open(fileString,'w')
+              lr.tofile(fileString,sep="\n")
+              lu.tofile(fileString2,sep="\n")
+              #fileID.close()
 
+        exit()
         self.nSequenceSteps = 0
         self.nSolveSteps=self.nList[0].adaptMesh_nSteps-1
         for (self.tn_last,self.tn) in zip(self.tnList[:-1],self.tnList[1:]):
