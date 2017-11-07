@@ -1035,9 +1035,9 @@ class NS_base:  # (HasTraits):
             #     'velocityError', scalar)
 
             # This is hardcoded for the RANS3PF to be the 4th model
-            scalar[:,0] = self.modelList[4].levelModelList[0].coefficients.phi_s
-            p0.domain.PUMIMesh.transferFieldToPUMI(
-                'phi_s', scalar)
+            #scalar[:,0] = self.modelList[4].levelModelList[0].coefficients.phi_s
+            #p0.domain.PUMIMesh.transferFieldToPUMI(
+            #    'phi_s', scalar)
 
             del scalar
             #Get Physical Parameters
@@ -1056,7 +1056,7 @@ class NS_base:  # (HasTraits):
             if(sfConfig=="ERM"):
               errorTotal= p0.domain.PUMIMesh.get_local_error()
 
-              if(p0.domain.PUMIMesh.willAdapt()):
+            if(p0.domain.PUMIMesh.willAdapt()):
                 adaptMeshNow=True
                 logEvent("Need to Adapt")
             elif(sfConfig=='interface' ):
@@ -1103,6 +1103,7 @@ class NS_base:  # (HasTraits):
         n0 = self.nList[0]
         sfConfig = p0.domain.PUMIMesh.size_field_config()
         logEvent("h-adapt mesh by calling AdaptPUMIMesh")
+        p0.domain.PUMIMesh.getInterfaceBandWidth(n0.runCFL,n0.adaptMesh_nSteps,self.modelList[0].levelModelList[0].coefficients.epsFact_density);
         p0.domain.PUMIMesh.adaptPUMIMesh()
 
         #code to suggest adapting until error is reduced;

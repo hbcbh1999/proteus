@@ -16,7 +16,7 @@ static void SmoothField(apf::Field *f);
 
 /* Based on the distance from the interface epsilon can be controlled to determine
    thickness of refinement near the interface */
-static double isotropicFormula(double phi, double dphi, double verr, double hmin, double hmax, double phi_s = 0)
+static double isotropicFormula(double phi, double dphi, double verr, double hmin, double hmax, double phi_s = 0,int L_band = 5)
 {
   double size;
   double dphi_size_factor;
@@ -24,7 +24,7 @@ static double isotropicFormula(double phi, double dphi, double verr, double hmin
   //This is just a hack for now. This disable the refinement over phi and does it over phi_s
   // if (phi_s != 0.0)
   // {
-  if (fabs(phi_s) < 5.0 * hmin)
+  if (fabs(phi) < L_band * hmin)
     return hmin;
   else
     return hmax;
@@ -54,20 +54,21 @@ int MeshAdaptPUMIDrvr::calculateSizeField()
   apf::Field *phif = m->findField("phi");
   assert(phif);
   ////////////////////////////////////////
-  apf::Field *phisError = m->findField("phi_s");
-  assert(phisError);
+  //apf::Field *phisError = m->findField("phi_s");
+  //assert(phisError);
   /////////////////////////////////////////
-  apf::Field *phiCorr = m->findField("phiCorr");
-  assert(phiCorr);
-  apf::Field *velocityError = m->findField("velocityError");
-  assert(phiCorr);
+  //apf::Field *phiCorr = m->findField("phiCorr");
+  //assert(phiCorr);
+  //apf::Field *velocityError = m->findField("velocityError");
+  //assert(phiCorr);
   while ((v = m->iterate(it)))
   {
     double phi = apf::getScalar(phif, v, 0);
-    double phi_s = apf::getScalar(phisError, v, 0);
+    //double phi_s = apf::getScalar(phisError, v, 0);
     // double dphi = apf::getScalar(phiCorr, v, 0);
     // double verr = apf::getScalar(velocityError, v, 0);
-    double size = isotropicFormula(0.0, 0.0, 0.0, hmin, hmax, phi_s);
+    //double size = isotropicFormula(phi, 0.0, 0.0, hmin, hmax, phi_s,L_band);
+    double size = isotropicFormula(phi, 0.0, 0.0, hmin, hmax, 0.0,L_band);
     apf::setScalar(size_iso, v, 0, size);
   }
   m->end(it);

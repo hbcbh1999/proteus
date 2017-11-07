@@ -42,6 +42,7 @@ cdef extern from "MeshAdaptPUMI/MeshAdaptPUMI.h":
         double getTotalMass()
         double getMPvalue(double,double, double)
         void get_local_error(double)
+        void getInterfaceBandWidth(double, int, double);
 
 cdef class MeshAdaptPUMI:
     cdef MeshAdaptPUMIDrvr *thisptr
@@ -131,3 +132,5 @@ cdef class MeshAdaptPUMI:
         return errTotal
     def getMinimumQuality(self):
         return self.thisptr.getMinimumQuality()
+    def getInterfaceBandWidth(self, runCFL, N_solverSteps, blendMultiplier):
+        return self.thisptr.getInterfaceBandWidth(runCFL,N_solverSteps,blendMultiplier)

@@ -56,6 +56,7 @@ class MeshAdaptPUMIDrvr{
   int testIsotropicSizeField();
   int getERMSizeField(double err_total);
   int gradeMesh();
+  void getInterfaceBandWidth(double runCFL, int N_solverSteps, double blendMultiplier);
 
   //Quality Check Functions
   double getMinimumQuality();
@@ -72,6 +73,7 @@ class MeshAdaptPUMIDrvr{
   int nAdapt; //counter for number of adapt steps
   int nEstimate; //counter for number of error estimator calls
   int nsd; //number of spatial dimensions
+  int L_band; //half-width of interface band computed based on CFL
 
   //User Inputs
   std::string size_field_config; //What type of size field: interface, ERM, isotropic

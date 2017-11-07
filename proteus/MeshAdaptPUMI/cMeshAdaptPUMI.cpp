@@ -377,7 +377,6 @@ int MeshAdaptPUMIDrvr::adaptPUMIMesh()
   //m->destroyTag(fluxtag[1]); m->destroyTag(fluxtag[2]); m->destroyTag(fluxtag[3]);
   delete [] exteriorGlobaltoLocalElementBoundariesArray;
   exteriorGlobaltoLocalElementBoundariesArray = NULL;
-
   for (int d = 0; d <= m->getDimension(); ++d)
     freeNumbering(local[d]);
 
@@ -491,3 +490,14 @@ double MeshAdaptPUMIDrvr::getTotalMass()
   return mass;
 }
 /** @} */
+
+
+void MeshAdaptPUMIDrvr::getInterfaceBandWidth(double runCFL, int N_solverSteps, double blendMultiplier){
+/**
+ * @brief Function to compute the number of elements in the refined interface band for MeshAdapt
+ *
+ * Sets the number of elements in the width of half the interface band 
+ */
+  L_band = ceil(runCFL*N_solverSteps+blendMultiplier);
+
+}
