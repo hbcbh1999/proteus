@@ -626,8 +626,8 @@ namespace proteus
             { double phi1 = abs(phi);
               norm_S = sqrt(2.0*(grad_u[0]*grad_u[0] + grad_v[1]*grad_v[1] +
                                  0.5*(grad_u[1]+grad_v[0])*(grad_u[1]+grad_v[0])));
-              nu_t0 = smagorinskyConstant*smagorinskyConstant*0.004*norm_S*exp(-phi1/10);
-              nu_t1 = smagorinskyConstant*smagorinskyConstant*0.004*norm_S*exp(-phi1/10);
+              nu_t0 = smagorinskyConstant*smagorinskyConstant*0.004*norm_S*exp(-phi1/0.06);
+              nu_t1 = smagorinskyConstant*smagorinskyConstant*0.004*norm_S*exp(-phi1/0.06);
             }
           case 1:
             {
