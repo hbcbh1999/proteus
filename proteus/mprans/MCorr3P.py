@@ -215,6 +215,16 @@ class Coefficients(proteus.TransportCoefficients.TC_base):
             #self.vofModel.q[('u',0)] += self.massCorrModel.q[('r',0)]
             # print "********************max
             # VOF************************",max(self.vofModel.q[('u',0)].flat[:])
+        # Compute metrics for bubble
+        if self.massCorrModel.computeMetricsForBubble:
+            self.massCorrModel.getMetricsForBubble()
+            if self.massCorrModel.comm.isMaster():
+                self.massCorrModel.metricsForBubble.write(repr(self.massCorrModel.timeIntegration.dt)+","+
+                                                          repr(self.massCorrModel.timeIntegration.t)+","+
+                                                          repr(self.massCorrModel.global_Xy)+","+
+                                                          repr(self.massCorrModel.global_Uy)+
+                                                  "\n")
+                self.massCorrModel.metricsForBubble.flush()            
         if self.checkMass:
             log(
                 "Phase 0 mass after mass correction (VOF) %12.5e" %
@@ -681,8 +691,50 @@ class LevelModel(proteus.Transport.OneLevelTransport):
             self.testSpace[0].referenceFiniteElement.localFunctionSpace.dim,
             self.nElementBoundaryQuadraturePoints_elementBoundary,
             compKernelFlag)
-    # mwf these are getting called by redistancing classes,
+        # mwf these are getting called by redistancing classes,
 
+        # Metrics for bubble
+        self.computeMetricsForBubble=True
+        self.global_Xy = 0.0
+        self.global_Uy = 0.0
+        if self.computeMetricsForBubble and self.comm.isMaster():
+            self.metricsForBubble = open(self.name+"_metricsForBubble.csv","w")
+            self.metricsForBubble.write('time_step'+","+
+                                        'time'+","+
+                                        'global_Xy'+","+
+                                        'global_Uy'+
+                                        "\n")
+    ####
+    def getMetricsForBubble(self):
+        (global_Xy,
+         global_Uy,
+         global_Bubble) = self.mcorr3p.calculateMetricsForBubble(#element
+             self.u[0].femSpace.elementMaps.psi,
+             self.u[0].femSpace.elementMaps.grad_psi,
+             self.mesh.nodeArray,
+             self.mesh.elementNodesArray,
+             self.elementQuadratureWeights[('u',0)],
+             self.u[0].femSpace.psi,
+             self.u[0].femSpace.grad_psi,
+             self.u[0].femSpace.psi,
+             #physics
+             self.mesh.nElements_global,
+             self.mesh.nElements_owned,
+             self.coefficients.useMetrics,
+             self.u[0].femSpace.dofMap.l2g,
+             self.mesh.elementDiametersArray,
+             self.mesh.nodeDiametersArray,
+             self.coefficients.epsFactHeaviside,
+             self.coefficients.lsModel.u[0].dof,
+             self.coefficients.lsModel.coefficients.q_v,
+             self.offset[0],self.stride[0])
+
+        from proteus.flcbdfWrappers import globalSum
+        # metrics about conservation
+        self.global_Xy = globalSum(global_Xy)/globalSum(global_Bubble)
+        self.global_Uy = globalSum(global_Uy)/globalSum(global_Bubble)
+    ###
+    
     def calculateCoefficients(self):
         pass
 

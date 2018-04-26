@@ -250,8 +250,7 @@ namespace proteus
 					   double degree_polynomial,
 					   double epsFactHeaviside,
 					   double* u_dof,
-					   double* u0_dof,
-					   double* u_exact,
+					   double* velocity,
 					   int offset_u, int stride_u,
 					   double* global_Xy,
 					   double* global_Uy,
@@ -1428,8 +1427,7 @@ namespace proteus
 				     double degree_polynomial,
 				     double epsFactHeaviside,
 				     double* u_dof,
-				     double* u0_dof,
-				     double* u_exact,
+				     double* velocity,
 				     int offset_u, int stride_u,
 				     double* global_Xy,
 				     double* global_Uy,
@@ -1486,7 +1484,7 @@ namespace proteus
                     if (uh >= 0) // if inside the bubble
 		      {
 			cell_Xy += y*dV;
-			cell_Uy += y*dV;
+			cell_Uy += velocity[eN_k_nSpace+1]*dV; //Uy
 			cell_V += dV;
 		      }
                   }

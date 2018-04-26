@@ -365,7 +365,30 @@ namespace proteus
 					  double useMetrics,
 					  double epsFactDiffusion,
 					  double* elementDiameter,
-					  double* nodeDiametersArray)=0;    
+					  double* nodeDiametersArray)=0;
+    virtual void calculateMetricsForBubble( //EOS=End Of Simulation
+					   double* mesh_trial_ref,
+					   double* mesh_grad_trial_ref,
+					   double* mesh_dof,
+					   int* mesh_l2g,
+					   double* dV_ref,
+					   double* u_trial_ref,
+					   double* u_grad_trial_ref,
+					   double* u_test_ref,
+					   //physics
+					   int nElements_global,
+					   int nElements_owned,
+					   int useMetrics,
+					   int* u_l2g,
+					   double* elementDiameter,
+					   double* nodeDiametersArray,
+					   double epsFactHeaviside,
+					   double* u_dof,
+					   double* velocity,
+					   int offset_u, int stride_u,
+					   double* global_Xy,
+					   double* global_Uy,
+					   double* global_V)=0;    
   };
 
   template<class CompKernelType,
@@ -2091,7 +2114,92 @@ namespace proteus
 	    }//i
 	}//elements
     }//calculateStiffnessMatrix
-    
+
+    void calculateMetricsForBubble( //EOS=End Of Simulation
+				   double* mesh_trial_ref,
+				   double* mesh_grad_trial_ref,
+				   double* mesh_dof,
+				   int* mesh_l2g,
+				   double* dV_ref,
+				   double* u_trial_ref,
+				   double* u_grad_trial_ref,
+				   double* u_test_ref,
+				   //physics
+				   int nElements_global,
+				   int nElements_owned,
+				   int useMetrics,
+				   int* u_l2g,
+				   double* elementDiameter,
+				   double* nodeDiametersArray,
+				   double epsFactHeaviside,
+				   double* u_dof,
+				   double* velocity,
+				   int offset_u, int stride_u,
+				   double* global_Xy,
+				   double* global_Uy,
+				   double* global_V)
+    {
+      *global_Xy = 0.0;
+      *global_Uy = 0.0;
+      *global_V = 0.0;
+      //////////////////////
+      // ** LOOP IN CELLS //
+      //////////////////////
+      for(int eN=0;eN<nElements_global;eN++)
+	{
+	  if (eN<nElements_owned) // just consider the locally owned cells
+	    {
+	      //declare local storage for local contributions and initialize
+	      double cell_Xy = 0., cell_Uy = 0., cell_V = 0.;
+	      //loop over quadrature points and compute integrands
+	      for  (int k=0;k<nQuadraturePoints_element;k++)
+		{
+		  //compute indeces and declare local storage
+		  register int eN_k = eN*nQuadraturePoints_element+k,
+		    eN_k_nSpace = eN_k*nSpace,
+		    eN_nDOF_trial_element = eN*nDOF_trial_element;
+		  register double uh, 
+		    //for general use
+		    jac[nSpace*nSpace], jacDet, jacInv[nSpace*nSpace],
+		    dV,x,y,z,h_phi;
+		  //get the physical integration weight
+		  ck.calculateMapping_element(eN,
+					      k,
+					      mesh_dof,
+					      mesh_l2g,
+					      mesh_trial_ref,
+					      mesh_grad_trial_ref,
+					      jac,
+					      jacDet,
+					      jacInv,
+					      x,y,z);
+		  ck.calculateH_element(eN,
+					k,
+					nodeDiametersArray,
+					mesh_l2g,
+					mesh_trial_ref,
+					h_phi);
+		  dV = fabs(jacDet)*dV_ref[k];
+		  // get functions at quad points
+		  ck.valFromDOF(u_dof,&u_l2g[eN_nDOF_trial_element],&u_trial_ref[k*nDOF_trial_element],uh);
+		  
+		  //////////////////////////
+		  // compute cell metrics //
+		  //////////////////////////
+		  // metrics on the interface
+		  if (uh >= 0) // if inside the bubble
+		    {
+		      cell_Xy += y*dV;
+		      cell_Uy += velocity[eN_k_nSpace+1]*dV; //Uy
+		      cell_V += dV;
+		    }
+		}
+	      *global_Xy += cell_Xy;
+	      *global_Uy += cell_Uy;
+	      *global_V += cell_V;
+	    }//elements
+	}
+    }    
   };//cppMCorr3P
 
   inline cppMCorr3P_base* newMCorr3P(int nSpaceIn,

@@ -214,8 +214,7 @@ cdef extern from "CLSVOF.h" namespace "proteus":
                                    double degree_polynomial,
                                    double epsFactHeaviside,
                                    double* u_dof,
-                                   double* u0_dof,
-                                   double* u_exact,
+                                   double* velocity,
                                    int offset_u, int stride_u,
                                    double* global_Xy,
                                    double* global_Uy,
@@ -730,8 +729,7 @@ cdef class cCLSVOF_base:
                              double degree_polynomial,
                              double epsFactHeaviside,
                              numpy.ndarray u_dof,
-                             numpy.ndarray u0_dof,
-                             numpy.ndarray u_exact,
+                             numpy.ndarray velocity,
                              int offset_u, int stride_u):
         cdef double global_Xy
         cdef double global_Uy
@@ -753,8 +751,7 @@ cdef class cCLSVOF_base:
                                            degree_polynomial,
                                            epsFactHeaviside,
                                            <double*>u_dof.data,
-                                           <double*>u0_dof.data,
-                                           <double*>u_exact.data,
+                                           <double*>velocity.data,
                                            offset_u,
                                            stride_u,
                                            &global_Xy,
