@@ -480,6 +480,9 @@ class Newton(NonlinearSolver):
         memory()
         if self.linearSolver.computeEigenvalues:
             self.u0[:]=u
+
+        if par_u is not None:
+            par_u.scatter_forward_insert()
         r=self.solveInitialize(u,r,b)
         if par_u is not None:
             #allow linear solver to know what type of assembly to use
@@ -682,6 +685,31 @@ class AddedMassNewton(Newton):
             Newton.solve(self,u,r,b,par_u,par_r)
 
 class TwoStageNewton(Newton):
+    """Solves a 2 Stage problem via Newton's solve"""
+    def solve(self,u,r=None,b=None,par_u=None,par_r=None):
+        r""" Solves a 2 Stage problem via Newton's solve"""
+
+        #####################################
+        # ********** FIRST STAGE ********** #
+        #####################################
+        logEvent(" FIRST STAGE",level=1)        
+        hasStage = hasattr(self.F,'stage') and hasattr(self.F,'useTwoStageNewton') and self.F.useTwoStageNewton==True 
+        if hasStage==False:            
+            logEvent(" WARNING: TwoStageNewton will consider a single stage",level=1)
+        else:
+            self.F.stage = 1
+        Newton.solve(self,u,r,b,par_u,par_r)
+        ######################################
+        # ********** SECOND STAGE ********** #
+        ######################################
+        if hasStage==False:
+            return self.failedFlag
+        else:
+            logEvent(" SECOND STAGE",level=1)
+            self.F.stage = 2
+            Newton.solve(self,u,r,b,par_u,par_r)
+        
+class TwoStageNewton2(Newton):
     """Solves a 2 Stage problem via Newton's solve"""
     def solve(self,u,r=None,b=None,par_u=None,par_r=None):
         r""" Solves a 2 Stage problem via Newton's solve"""
