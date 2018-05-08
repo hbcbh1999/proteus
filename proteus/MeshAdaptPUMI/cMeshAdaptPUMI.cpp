@@ -29,7 +29,7 @@
  @{ 
 */
 MeshAdaptPUMIDrvr::MeshAdaptPUMIDrvr(double Hmax, double Hmin, int NumIter,
-    const char* sfConfig, const char* maType,const char* logType, double targetError, double targetElementCount,int reconstructedFlag,double maxAspectRatio)
+    const char* sfConfig, const char* maType,const char* logType, double targetError, double targetElementCount,int reconstructedFlag)
 /**
  * MeshAdaptPUMIDrvr is the highest level class that handles the interface between Proteus and the PUMI libraries
  * See MeshAdaptPUMI.h for the list of class variables/functions/objects
@@ -79,7 +79,6 @@ MeshAdaptPUMIDrvr::MeshAdaptPUMIDrvr(double Hmax, double Hmin, int NumIter,
   THRESHOLD = 0.0;
   isReconstructed = reconstructedFlag;
   initialReconstructed = 0;
-  maxAspect = maxAspectRatio;
 }
 
 MeshAdaptPUMIDrvr::~MeshAdaptPUMIDrvr()
@@ -367,9 +366,7 @@ int MeshAdaptPUMIDrvr::adaptPUMIMesh()
     char namebuffer[20];
     sprintf(namebuffer,"pumi_preadapt_%i",nAdapt);
     apf::writeVtkFiles(namebuffer, m);
-    sprintf(namebuffer,"beforeAnisotropicAdapt_%i.smb",nAdapt);
-    m->writeNative(namebuffer);
-
+    m->writeNative("beforeAnisotropicAdapt.smb");
 /* Code to output size scale and frame
     apf::MeshIterator* it = m->begin(0);
     apf::MeshEntity* test;
@@ -399,7 +396,6 @@ int MeshAdaptPUMIDrvr::adaptPUMIMesh()
       freeField(errRho_reg); 
       freeField(errRel_reg); 
   }
-
   // These are relics from an attempt to pass BCs from proteus into the error estimator.
   // They maybe useful in the future.
   //m->destroyTag(fluxtag[1]); m->destroyTag(fluxtag[2]); m->destroyTag(fluxtag[3]);
@@ -409,24 +405,13 @@ int MeshAdaptPUMIDrvr::adaptPUMIMesh()
   for (int d = 0; d <= m->getDimension(); ++d)
     freeNumbering(local[d]);
 
-  apf::Field* adaptSize;
-  apf::Field* adaptFrame;
-
   /// Adapt the mesh
   assert(size_iso || (size_scale && size_frame));
   ma::Input* in;
-  if(adapt_type_config=="anisotropic" || size_field_config== "interface"){
-    //in = ma::configure(m, size_scale, size_frame);
-    adaptSize  = apf::createFieldOn(m, "adapt_size", apf::VECTOR);
-    adaptFrame = apf::createFieldOn(m, "adapt_frame", apf::MATRIX);
-    apf::copyData(adaptSize, size_scale);
-    apf::copyData(adaptFrame, size_frame);
-    in = ma::configure(m, adaptSize, adaptFrame);
-  }
+  if(adapt_type_config=="anisotropic" || size_field_config== "interface")
+    in = ma::configure(m, size_scale, size_frame);
   else{
-    adaptSize  = apf::createFieldOn(m, "adapt_size", apf::SCALAR);
-    apf::copyData(adaptSize, size_iso);
-    in = ma::configure(m, adaptSize);
+    in = ma::configure(m, size_iso);
   }
   ma::validateInput(in);
   in->shouldRunPreZoltan = true;
@@ -436,10 +421,9 @@ int MeshAdaptPUMIDrvr::adaptPUMIMesh()
   in->maximumIterations = numIter;
   in->shouldSnap = false;
   in->shouldFixShape = true;
-  in->shouldForceAdaptation = false;
-  in->goodQuality = 0.008;
+  in->shouldForceAdaptation = true;
   double mass_before = getTotalMass();
-  
+
   double t1 = PCU_Time();
   //ma::adapt(in);
   ma::adaptVerbose(in);
@@ -473,13 +457,9 @@ int MeshAdaptPUMIDrvr::adaptPUMIMesh()
     char namebuffer[20];
     sprintf(namebuffer,"pumi_postadapt_%i",nAdapt);
     apf::writeVtkFiles(namebuffer, m);
-    sprintf(namebuffer,"afterAnisotropicAdapt_%i.smb",nAdapt);
-    m->writeNative(namebuffer);
+    m->writeNative("afterAnisotropicAdapt.smb");
   }
   //isReconstructed = 0; //this is needed to maintain consistency with the post-adapt conversion back to Proteus
-  apf::destroyField(adaptSize);
-  if(adapt_type_config=="anisotropic")
-    apf::destroyField(adaptFrame);
   nAdapt++; //counter for number of adapt steps
   return 0;
 }
