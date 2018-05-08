@@ -17,7 +17,8 @@ cdef extern from "cmeshToolsModule.h":
 
 cdef extern from "MeshAdaptPUMI/MeshAdaptPUMI.h":
     cdef cppclass MeshAdaptPUMIDrvr:
-        MeshAdaptPUMIDrvr(double, double, int, char*, char*,char*,double,double,int,double,double)
+        MeshAdaptPUMIDrvr(double, double, int, char*, char*,char*,double,double,int,double)
+        MeshAdaptPUMIDrvr(double, double, int, char*, char*,char*,double,double,int)
         int numIter, numAdaptSteps
         string size_field_config, adapt_type_config
         int isReconstructed
@@ -32,7 +33,7 @@ cdef extern from "MeshAdaptPUMI/MeshAdaptPUMI.h":
         int updateMaterialArrays2(Mesh&)
         int transferFieldToPUMI(char*, double*, int, int)
         int transferFieldToProteus(char*, double*, int, int)
-        int transferPropertiesToPUMI(double*, double*,double*,double)
+        int transferPropertiesToPUMI(double*, double*,double*)
         int transferModelInfo(int*,int*,int*,int*,int*,int*,int)
         int transferBCtagsToProteus(int*, int, int*, int*,double*)
         int transferBCsToProteus()
@@ -43,19 +44,16 @@ cdef extern from "MeshAdaptPUMI/MeshAdaptPUMI.h":
         double getMinimumQuality()
         double getTotalMass()
         double getMPvalue(double,double, double)
-        void get_local_error(double) 
-        void get_VMS_error(double) 
-        void writeMesh(char* )
+        void get_local_error(double)
 
 cdef class MeshAdaptPUMI:
     cdef MeshAdaptPUMIDrvr *thisptr
     cdef double hmax, hmin
     cdef int numIter, numAdaptSteps
     cdef int isReconstructed
-    cdef double deltaT
-    def __cinit__(self, hmax=100.0, hmin=1e-8, numIter=10, sfConfig="ERM",maType="test",logType="off",targetError=0,targetElementCount=0,reconstructedFlag=0,maxAspectRatio=100.0,gradingFact=1.5):
+    def __cinit__(self, hmax=100.0, hmin=1e-8, numIter=10, sfConfig="ERM",maType="test",logType="off",targetError=0,targetElementCount=0,reconstructedFlag=0,maxAspectRatio=100.0):
         logEvent("MeshAdaptPUMI: hmax = {0} hmin = {1} numIter = {2}".format(hmax,hmin,numIter))
-        self.thisptr = new MeshAdaptPUMIDrvr(hmax, hmin, numIter, sfConfig,maType,logType,targetError,targetElementCount,reconstructedFlag,maxAspectRatio,gradingFact)
+        self.thisptr = new MeshAdaptPUMIDrvr(hmax, hmin, numIter, sfConfig,maType,logType,targetError,targetElementCount,reconstructedFlag,maxAspectRatio)
     def __dealloc__(self):
         del self.thisptr
     def size_field_config(self):
@@ -99,11 +97,11 @@ cdef class MeshAdaptPUMI:
     def transferFieldToProteus(self, name, np.ndarray[np.double_t,ndim=2,mode="c"] outArray):
         outArray = np.ascontiguousarray(outArray)
         return self.thisptr.transferFieldToProteus(name, &outArray[0,0], outArray.shape[1], outArray.shape[0])
-    def transferPropertiesToPUMI(self, np.ndarray[np.double_t,ndim=1,mode="c"] rho, np.ndarray[np.double_t,ndim=1,mode="c"] nu, np.ndarray[np.double_t,ndim=1,mode="c"] g, deltaT):
+    def transferPropertiesToPUMI(self, np.ndarray[np.double_t,ndim=1,mode="c"] rho, np.ndarray[np.double_t,ndim=1,mode="c"] nu, np.ndarray[np.double_t,ndim=1,mode="c"] g):
         rho = np.ascontiguousarray(rho)
         nu = np.ascontiguousarray(nu)
         g = np.ascontiguousarray(g)
-        return self.thisptr.transferPropertiesToPUMI(&rho[0],&nu[0],&g[0],deltaT)
+        return self.thisptr.transferPropertiesToPUMI(&rho[0],&nu[0],&g[0])
     def transferModelInfo(self, np.ndarray[int,ndim=1,mode="c"] numModelEntities,
                                 np.ndarray[int,ndim=2,mode="c"] edges,
                                 np.ndarray[int,ndim=2,mode="c"] faces,
@@ -142,11 +140,5 @@ cdef class MeshAdaptPUMI:
         errTotal=0.0;
         self.thisptr.get_local_error(errTotal)
         return errTotal
-    def get_VMS_error(self):
-        errTotal=0.0;
-        self.thisptr.get_VMS_error(errTotal)
-        return errTotal
     def getMinimumQuality(self):
         return self.thisptr.getMinimumQuality()
-    def writeMesh(self,meshName):
-        return self.thisptr.writeMesh(meshName)
