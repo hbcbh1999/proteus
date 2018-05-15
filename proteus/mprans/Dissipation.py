@@ -156,7 +156,7 @@ Chaper 11 or k-omega (Wilcox 1998).
             self.variableNames = ['omega']
         nc = 1
         self.nd = nd
-        assert self.nd == 3, "Dissipation only implements 3d for now"  # assume 3d for now
+        #assert self.nd == 3, "Dissipation only implements 3d for now"  # assume 3d for now
         self.rho_0 = rho_0
         self.nu_0 = nu_0
         self.rho_1 = rho_1
@@ -344,7 +344,10 @@ Chaper 11 or k-omega (Wilcox 1998).
             self.ebqe_v = numpy.ones(cebqe[('f', 0)].shape, 'd')
             self.ebqe_grad_u = numpy.ones(cebqe[('grad(u)', 0)].shape, 'd')
             self.ebqe_grad_v = numpy.ones(cebqe[('grad(u)', 0)].shape, 'd')
-            self.ebqe_grad_w = numpy.ones(cebqe[('grad(u)', 0)].shape, 'd')
+            if self.nd ==2:
+                self.ebqe_grad_w = self.ebqe_grad_v.copy()
+            else:
+                self.ebqe_grad_w = numpy.ones(cebqe[('grad(u)', 0)].shape, 'd')
         if self.kappa_modelIndex is None:
             self.ebqe_kappa = numpy.ones(cebqe[('u', 0)].shape, 'd')
             self.ebqe_kappa.fill(self.default_kappa)
