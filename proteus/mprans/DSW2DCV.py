@@ -328,7 +328,7 @@ class Coefficients(proteus.TransportCoefficients.TC_base):
         reaction = {}
         hamiltonian = {}
         if nd == 2:
-            variableNames = ['h', 'u', 'v', 'seta', 'w']
+            variableNames = ['h', 'hu', 'hv', 'heta', 'hw']
             mass = {0: {0: 'linear'},
                     1: {0: 'linear', 1: 'linear'},
                     2: {0: 'linear', 2: 'linear'},

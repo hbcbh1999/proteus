@@ -14,7 +14,7 @@ h2=0.11
 x0 = 2
 D = np.sqrt(g * h2)
 
-T=5.00
+T=0.1
 nDTout=100
 
 domain = RectangularDomain(L=L,x=[0,0,0])
@@ -55,7 +55,7 @@ class mom_at_t0:
     def uOfXT(self,X,t):
         return D*(solitary(X,t) - h1)
 
-class eta_at_t0:
+class heta_at_t0:
     def uOfXT(self,X,t):
         return solitary(X,t)**2.
 
@@ -63,16 +63,16 @@ class Zero:
     def uOfXT(self,x,t):
         return 0.0
 
-analyticalSolution = {0:water_height_at_t0(),
-                      1:Zero(),
-                      2:Zero(),
-                      3:Zero(),
-                      4:Zero()}
+#analyticalSolution = {0:water_height_at_t0(),
+#                      1:Zero(),
+#                      2:Zero(),
+#                      3:Zero(),
+#                      4:Zero()}
 
 initialConditions = {0:water_height_at_t0(),
                      1:mom_at_t0(),
                      2:Zero(),
-                     3:eta_at_t0(),
+                     3:heta_at_t0(),
                      4:Zero()}
 
 ###################################
@@ -83,22 +83,19 @@ def getDBC_h(x,flag):
         return lambda x,t: h1
 
 def getDBC_hu(x,flag):
-    None
-    #if [0]==0 or x[0]==L[0]:
-    #    return lambda x,t: 0.
+    if [0]==0 or x[0]==L[0]:
+        return lambda x,t: 0.
     
 def getDBC_hv(x,flag):
-    None
-    #return lambda x,t: 0.0
+    return lambda x,t: 0.0
 
 def getDBC_heta(x,flag):
-    None
-    #if x[0]==0 or x[0]==L[0]:
-    #    return lambda x,t: h1**2.
+    if x[0]==0 or x[0]==L[0]:
+        return lambda x,t: h1**2.
 
 def getDBC_hw(x,flag):
-    None
-    #return lambda x,t: 0.0    
+    if x[0]==0 or x[0]==L[0]:
+        return lambda x,t: 0.0    
 
 dirichletConditions = {0:getDBC_h,
                        1:getDBC_hu,

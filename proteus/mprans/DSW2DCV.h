@@ -2435,7 +2435,17 @@ namespace proteus
 	      // EJT. Corrected terms to match our paper
 	      // and define both Guermond and Gavrilyuk force terms for hw equation.
 	      double etai = hetai*one_over_hiReg;
-	      double xxi = etai*one_over_hiReg;
+	      //double xxi = etai*one_over_hiReg;
+	      double hi_to_the_minus_one = veli_norm == 0. ?  0 : 2./(hi + fmax(hi,0.5*g*dt*veli_norm));
+	      //double etai = hetai*hi_to_the_minus_one;
+	      double xxi = etai*hi_to_the_minus_one; 
+	      //std::cout << hi << "\t"
+	      //	<< g*dt*veli_norm << "\t"
+	      //	<< veli_norm << "\t"
+	      //	<< ui*ui << "\t"
+	      //	<< hui << "\t"
+	      //	<< std::endl;
+	      	     	      
 	      //double xxi = hetai/std::pow(hi,2.0);
 	      double meshi = std::sqrt(mi);
 	      double psii = 12.0 * (xxi - 1.0);
@@ -2448,6 +2458,7 @@ namespace proteus
 		  force_term_hwi = -lambda*(xxi - 1.)*mi;
 		}
 
+	      //force_term_hwi = 0.;	    
 
               // loop over the sparsity pattern of the i-th DOF
               for (int offset=csrRowIndeces_DofLoops[i]; offset<csrRowIndeces_DofLoops[i+1]; offset++)
@@ -2473,17 +2484,19 @@ namespace proteus
                   // Define pTildej here. Standard is Guermond's
                   double pTildej =  lambda*g/(3. * meshj)*std::pow(hj,3.)*polyj;
                   // if WHICH_DISP_MODEL is 0 then Gavrilyuk's model is used.
-                      if (WHICH_DISP_MODEL==0)
-                          {
-          		    //pTildej = -lambda/3.*(etaj*one_over_hjReg-1.0)*etaj;
-			    pTildej = -lambda/3.*(xxj-1.0)*hetaj*one_over_hjReg;
-                          }
+		  if (WHICH_DISP_MODEL==0)
+		    {
+		      //pTildej = -lambda/3.*(etaj*one_over_hjReg-1.0)*etaj;
+		      pTildej = -lambda/3.*(xxj-1.0)*hetaj*one_over_hjReg;
+		    }
 
 		      // std::cout << pTildej << "\t" 
 		      //	<< xxj <<  "\t" 
 		      //	<< hetaj <<  "\t"
 		      //	<< one_over_hjReg <<  std::endl; 
 
+
+		  pTildej = 0;
                   // Nodal projection of fluxes
                   ith_flux_term1 += huj*Cx[ij] + hvj*Cy[ij]; // f1*C
 	          ith_flux_term2 += uj*huj*Cx[ij] + uj*hvj*Cy[ij] + (g*hi*(hj+Zj) + pTildej )*Cx[ij];
@@ -2607,23 +2620,23 @@ namespace proteus
 	      //				+ ith_friction_term3);
 
       	      low_order_hnp1[i]  = hi  - dt/mi*(ith_flux_term1
-          						- ith_dLij_minus_muLij_times_hStarStates
-          						- ith_muLij_times_hStates);
-                        low_order_hunp1[i] = hui - dt/mi*(ith_flux_term2
-          						- ith_dLij_minus_muLij_times_huStarStates
-          						- ith_muLij_times_huStates);
-	            // EJT. Set v = 0 for 1d setting.
+						- ith_dLij_minus_muLij_times_hStarStates
+						- ith_muLij_times_hStates);
+	      low_order_hunp1[i] = hui - dt/mi*(ith_flux_term2
+						- ith_dLij_minus_muLij_times_huStarStates
+						- ith_muLij_times_huStates);
+	      // EJT. Set v = 0 for 1d setting.
               low_order_hvnp1[i] = 0.0*( hvi - dt/mi*(ith_flux_term3
-						          - ith_dLij_minus_muLij_times_hvStarStates
-						          - ith_muLij_times_hvStates));
-
-	            low_order_hetanp1[i] = hetai - dt/mi*(ith_flux_term4
+						      - ith_dLij_minus_muLij_times_hvStarStates
+						      - ith_muLij_times_hvStates));
+	      
+	      low_order_hetanp1[i] = hetai - dt/mi*(ith_flux_term4
       						    - ith_dLij_minus_muLij_times_hetaStarStates
       						    - ith_muLij_times_hetaStates) + dt/mi*force_term_hetai;
-
+	      
               low_order_hwnp1[i] = hwi - dt/mi*(ith_flux_term5
-          						- ith_dLij_minus_muLij_times_hwStarStates
-          						- ith_muLij_times_hwStates) + dt/mi*force_term_hwi;
+						- ith_dLij_minus_muLij_times_hwStarStates
+						- ith_muLij_times_hwStates) + dt/mi*force_term_hwi;
               // FIX LOW ORDER SOLUTION //
               if (low_order_hnp1[i] < -1E-14 && dt < 1.0)
                 {
