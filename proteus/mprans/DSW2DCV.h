@@ -2431,7 +2431,7 @@ namespace proteus
 	      // FORCE TERMS //
 	      /////////////////
 	      //double etai = hetai*one_over_hiReg;
-	      double force_term_hetai = hwi*mi;
+
 	      // EJT. Corrected terms to match our paper
 	      // and define both Guermond and Gavrilyuk force terms for hw equation.
 	      double etai = hetai*one_over_hiReg;
@@ -2458,8 +2458,13 @@ namespace proteus
 		  force_term_hwi = -lambda*(xxi - 1.)*mi;
 		}
 
-	      //force_term_hwi = 0.;	    
+	      double force_term_hetai = hwi*mi;
+	      double hi_square = hi*hi;
+	      double aux = 2.0/(hi_square+fmax(hi_square,1.0*mi)); // ~1/h^2
+	      force_term_hwi = -lambda*(hetai*aux-1.0)*mi;
 
+	      //force_term_hetai = 0.;
+	      //force_term_hwi = 0.;
               // loop over the sparsity pattern of the i-th DOF
               for (int offset=csrRowIndeces_DofLoops[i]; offset<csrRowIndeces_DofLoops[i+1]; offset++)
                 {
@@ -2486,8 +2491,11 @@ namespace proteus
                   // if WHICH_DISP_MODEL is 0 then Gavrilyuk's model is used.
 		  if (WHICH_DISP_MODEL==0)
 		    {
+		      double hj2=hj*hj;
+		      double auxj = 2.0/(hj+fmax(hj,1.0*std::sqrt(mi))); // ~1/h		      
+		      double auxj2 = 2.0/(hj2+fmax(hj2,1.0*mi)); // ~1/h^2
 		      //pTildej = -lambda/3.*(etaj*one_over_hjReg-1.0)*etaj;
-		      pTildej = -lambda/3.*(xxj-1.0)*hetaj*one_over_hjReg;
+		      pTildej = -lambda/3.*(hetaj*auxj2-1.0)*hetaj*auxj;
 		    }
 
 		      // std::cout << pTildej << "\t" 
@@ -2496,7 +2504,7 @@ namespace proteus
 		      //	<< one_over_hjReg <<  std::endl; 
 
 
-		  pTildej = 0;
+		  //pTildej = 0;
                   // Nodal projection of fluxes
                   ith_flux_term1 += huj*Cx[ij] + hvj*Cy[ij]; // f1*C
 	          ith_flux_term2 += uj*huj*Cx[ij] + uj*hvj*Cy[ij] + (g*hi*(hj+Zj) + pTildej )*Cx[ij];
@@ -2570,27 +2578,27 @@ namespace proteus
                       ith_dHij_minus_muHij_times_hStarStates  += (dHij - muHij)*(hStarji-hStarij);
                       ith_dHij_minus_muHij_times_huStarStates += (dHij - muHij)*(huStarji-huStarij);
                       ith_dHij_minus_muHij_times_hvStarStates += (dHij - muHij)*(hvStarji-hvStarij);
-            		      ith_dHij_minus_muHij_times_hetaStarStates += (dHij - muHij)*(hetaStarji-hetaStarij);
-            		      ith_dHij_minus_muHij_times_hwStarStates += (dHij - muHij)*(hwStarji-hwStarij);
-
+		      ith_dHij_minus_muHij_times_hetaStarStates += (dHij - muHij)*(hetaStarji-hetaStarij);
+		      ith_dHij_minus_muHij_times_hwStarStates += (dHij - muHij)*(hwStarji-hwStarij);
+		      
                       ith_dLij_minus_muLij_times_hStarStates  += (dLij - muLij)*(hStarji-hStarij);
                       ith_dLij_minus_muLij_times_huStarStates += (dLij - muLij)*(huStarji-huStarij);
                       ith_dLij_minus_muLij_times_hvStarStates += (dLij - muLij)*(hvStarji-hvStarij);
-            		      ith_dLij_minus_muLij_times_hetaStarStates += (dLij - muLij)*(hetaStarji-hetaStarij);
-            		      ith_dLij_minus_muLij_times_hwStarStates += (dLij - muLij)*(hwStarji-hwStarij);
-
+		      ith_dLij_minus_muLij_times_hetaStarStates += (dLij - muLij)*(hetaStarji-hetaStarij);
+		      ith_dLij_minus_muLij_times_hwStarStates += (dLij - muLij)*(hwStarji-hwStarij);
+		      
                       // compute muij times solution terms
                       ith_muHij_times_hStates  += muHij*(hj-hi);
                       ith_muHij_times_huStates += muHij*(huj-hui);
                       ith_muHij_times_hvStates += muHij*(hvj-hvi);
-            		      ith_muHij_times_hetaStates += muHij*(hetaj-hetai);
-            		      ith_muHij_times_hwStates += muHij*(hwj-hwi);
-
+		      ith_muHij_times_hetaStates += muHij*(hetaj-hetai);
+		      ith_muHij_times_hwStates += muHij*(hwj-hwi);
+		      
                       ith_muLij_times_hStates  += muLij*(hj-hi);
                       ith_muLij_times_huStates += muLij*(huj-hui);
                       ith_muLij_times_hvStates += muLij*(hvj-hvi);
-            		      ith_muLij_times_hetaStates += muLij*(hetaj-hetai);
-            		      ith_muLij_times_hwStates += muLij*(hwj-hwi);
+		      ith_muLij_times_hetaStates += muLij*(hetaj-hetai);
+		      ith_muLij_times_hwStates += muLij*(hwj-hwi);
 
                       // compute dH_minus_dL
                       dH_minus_dL[ij] = dHij - dLij;
@@ -2662,8 +2670,8 @@ namespace proteus
                   globalResidual[offset_h+stride_h*i]   = low_order_hnp1[i];
                   globalResidual[offset_hu+stride_hu*i] = low_order_hunp1[i];
                   globalResidual[offset_hv+stride_hv*i] = low_order_hvnp1[i];
-            		  globalResidual[offset_heta+stride_heta*i] = low_order_hetanp1[i];
-            		  globalResidual[offset_hw+stride_hw*i] = low_order_hwnp1[i];
+		  globalResidual[offset_heta+stride_heta*i] = low_order_hetanp1[i];
+		  globalResidual[offset_hw+stride_hw*i] = low_order_hwnp1[i];
                 }
               else
                 {
