@@ -4,7 +4,7 @@ from sw_hump_2d_p import *
 
 refinement=5
 runCFL=0.4
-SSPOrder=1
+SSPOrder=3
 
 multilevelNonlinearSolver  = Newton
 if (LUMPED_MASS_MATRIX==1):

@@ -14,13 +14,13 @@ h2=0.11
 x0 = 2
 D = np.sqrt(g * h2)
 
-T=0.1
+T=4.0
 nDTout=100
 
 domain = RectangularDomain(L=L,x=[0,0,0])
-mannings=0
+mannings=0.0
 
-cE=0
+cE=1.0
 LUMPED_MASS_MATRIX=1
 LINEAR_FRICTION=1
 
@@ -46,7 +46,8 @@ def solitary(X,t):
     z = np.sqrt(z1 / z2)
     soliton =  h1 + (h2 - h1) * 1.0/(np.cosh(xi/2.0 * z)**2)
     return soliton
-
+    #return (X[0]>=1.0)*(X[0]<=2.0) * (h2-h1) + h1
+    
 class water_height_at_t0:
     def uOfXT(self,X,t):
         return solitary(X,t)
@@ -57,17 +58,17 @@ class mom_at_t0:
 
 class heta_at_t0:
     def uOfXT(self,X,t):
-        return solitary(X,t)**2.
+        return solitary(X,t)**2
 
 class Zero:
     def uOfXT(self,x,t):
         return 0.0
 
-#analyticalSolution = {0:water_height_at_t0(),
-#                      1:Zero(),
-#                      2:Zero(),
-#                      3:Zero(),
-#                      4:Zero()}
+analyticalSolution = {0:water_height_at_t0(),
+                      1:Zero(),
+                      2:Zero(),
+                      3:Zero(),
+                      4:Zero()}
 
 initialConditions = {0:water_height_at_t0(),
                      1:mom_at_t0(),
@@ -79,23 +80,27 @@ initialConditions = {0:water_height_at_t0(),
 ##### FOR BOUNDARY CONDITIONS #####
 ###################################
 def getDBC_h(x,flag):
-    if x[0]==0 or x[0]==L[0]:
-        return lambda x,t: h1
+    None
+    #if x[0]==0 or x[0]==L[0]:
+    #    return lambda x,t: h1
 
 def getDBC_hu(x,flag):
-    if [0]==0 or x[0]==L[0]:
-        return lambda x,t: 0.
+    None
+    #if [0]==0 or x[0]==L[0]:
+    #    return lambda x,t: 0.
     
 def getDBC_hv(x,flag):
     return lambda x,t: 0.0
 
 def getDBC_heta(x,flag):
-    if x[0]==0 or x[0]==L[0]:
-        return lambda x,t: h1**2.
+    None
+    #if x[0]==0 or x[0]==L[0]:
+    #    return lambda x,t: h1**2.
 
 def getDBC_hw(x,flag):
-    if x[0]==0 or x[0]==L[0]:
-        return lambda x,t: 0.0    
+    None
+    #if x[0]==0 or x[0]==L[0]:
+    #    return lambda x,t: 0.0    
 
 dirichletConditions = {0:getDBC_h,
                        1:getDBC_hu,
