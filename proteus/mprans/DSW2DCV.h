@@ -2435,10 +2435,10 @@ namespace proteus
 	      // EJT. Corrected terms to match our paper
 	      // and define both Guermond and Gavrilyuk force terms for hw equation.
 	      double etai = hetai*one_over_hiReg;
-	      //double xxi = etai*one_over_hiReg;
-	      double hi_to_the_minus_one = veli_norm == 0. ?  0 : 2./(hi + fmax(hi,0.5*g*dt*veli_norm));
+	      double xxi = etai*one_over_hiReg;
+	      //double hi_to_the_minus_one = veli_norm == 0. ?  0 : 2./(hi + fmax(hi,0.5*g*dt*veli_norm));
 	      //double etai = hetai*hi_to_the_minus_one;
-	      double xxi = etai*hi_to_the_minus_one; 
+	      //double xxi = etai*hi_to_the_minus_one; 
 	      //std::cout << hi << "\t"
 	      //	<< g*dt*veli_norm << "\t"
 	      //	<< veli_norm << "\t"
@@ -2459,12 +2459,10 @@ namespace proteus
 		}
 
 	      double force_term_hetai = hwi*mi;
-	      double hi_square = hi*hi;
-	      double aux = 2.0/(hi_square+fmax(hi_square,1.0*mi)); // ~1/h^2
-	      force_term_hwi = -lambda*(hetai*aux-1.0)*mi;
+	      //double hi_square = hi*hi;
+	      //double aux = 2.0/(hi_square+fmax(hi_square,1.0*mi)); // ~1/h^2
+	      //force_term_hwi = -lambda*(hetai*aux-1.0)*mi;
 
-	      //force_term_hetai = 0.;
-	      //force_term_hwi = 0.;
               // loop over the sparsity pattern of the i-th DOF
               for (int offset=csrRowIndeces_DofLoops[i]; offset<csrRowIndeces_DofLoops[i+1]; offset++)
                 {
@@ -2494,8 +2492,8 @@ namespace proteus
 		      double hj2=hj*hj;
 		      double auxj = 2.0/(hj+fmax(hj,1.0*std::sqrt(mi))); // ~1/h		      
 		      double auxj2 = 2.0/(hj2+fmax(hj2,1.0*mi)); // ~1/h^2
-		      //pTildej = -lambda/3.*(etaj*one_over_hjReg-1.0)*etaj;
-		      pTildej = -lambda/3.*(hetaj*auxj2-1.0)*hetaj*auxj;
+		      pTildej = -lambda/3.*(etaj*one_over_hjReg-1.0)*etaj;
+		      //pTildej = -lambda/3.*(hetaj*auxj2-1.0)*hetaj*auxj;
 		    }
 
 		      // std::cout << pTildej << "\t" 
@@ -2664,7 +2662,7 @@ namespace proteus
                   low_order_hunp1[i] *= 2*std::pow(low_order_hnp1[i],VEL_FIX_POWER)/(std::pow(low_order_hnp1[i],VEL_FIX_POWER)+std::pow(aux,VEL_FIX_POWER));
                   low_order_hvnp1[i] *= 2*std::pow(low_order_hnp1[i],VEL_FIX_POWER)/(std::pow(low_order_hnp1[i],VEL_FIX_POWER)+std::pow(aux,VEL_FIX_POWER));
                 }
-              int LOW_ORDER_SOLUTION=1; // FOR DEBUGGING
+              int LOW_ORDER_SOLUTION=0; // FOR DEBUGGING
               if (LOW_ORDER_SOLUTION==1)
                 {
                   globalResidual[offset_h+stride_h*i]   = low_order_hnp1[i];
@@ -2691,6 +2689,14 @@ namespace proteus
 				       - ith_dHij_minus_muHij_times_hvStarStates
 				       - ith_muHij_times_hvStates
 				       + ith_friction_term3);
+		      globalResidual[offset_heta+stride_heta*i]
+			= hetai - dt/mi*(ith_flux_term4
+					 - ith_dHij_minus_muHij_times_hetaStarStates
+					 - ith_muHij_times_hetaStates) + dt/mi*force_term_hetai;
+		      globalResidual[offset_hw+stride_hw*i]
+			= hwi - dt/mi*(ith_flux_term5
+				       - ith_dHij_minus_muHij_times_hwStarStates
+				       - ith_muHij_times_hwStates) + dt/mi*force_term_hwi;
                       // clean up potential negative water height due to machine precision
                       if (globalResidual[offset_h+stride_h*i] >= -1E-14)
                         globalResidual[offset_h+stride_h*i] = fmax(globalResidual[offset_h+stride_h*i],0.);
