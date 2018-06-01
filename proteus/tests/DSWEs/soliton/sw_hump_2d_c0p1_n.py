@@ -2,7 +2,7 @@ from proteus import *
 from proteus.default_n import *
 from sw_hump_2d_p import *
 
-refinement=5
+refinement=6
 runCFL=0.4
 SSPOrder=3
 

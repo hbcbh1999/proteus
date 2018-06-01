@@ -212,7 +212,7 @@ class RKEV(proteus.TimeIntegration.SSP):
                 self.transport.hu_dof_old[:] = self.u_dof_last[1]
                 self.transport.hv_dof_old[:] = self.u_dof_last[2]
                 self.transport.heta_dof_old[:] = self.u_dof_last[3]
-                self.transport.hw_dof_old[:] = self.u_dof_last[4]
+                self.transport.hw_dof_old[:] = self.u_dof_last[4]                
                 #dummy = np.copy(self.transport.u[ci].dof)
                 #self.transport.getResidual(self.transport.u[ci].dof[:],dummy)
         elif self.timeOrder == 2:
@@ -988,13 +988,17 @@ class LevelModel(proteus.Transport.OneLevelTransport):
         rowptr, colind, MassMatrix = self.MC_global.getCSRrepresentation()
         # Extract hnp1 from global solution u
         index = range(0, len(self.timeIntegration.u))
-        hIndex = index[0::3]
-        huIndex = index[1::3]
-        hvIndex = index[2::3]
+        hIndex = index[0::5]
+        huIndex = index[1::5]
+        hvIndex = index[2::5]
+        hetaIndex = index[3::5]
+        hwIndex = index[4::5]
         # create limited solution
         limited_hnp1 = numpy.zeros(self.h_dof_old.shape)
         limited_hunp1 = numpy.zeros(self.h_dof_old.shape)
         limited_hvnp1 = numpy.zeros(self.h_dof_old.shape)
+        limited_hetanp1 = numpy.zeros(self.h_dof_old.shape)
+        limited_hwnp1 = numpy.zeros(self.h_dof_old.shape)
         # Do some type of limitation
 
         self.sw2d.FCTStep(self.timeIntegration.dt,
@@ -1004,16 +1008,24 @@ class LevelModel(proteus.Transport.OneLevelTransport):
                           self.h_dof_old,
                           self.hu_dof_old,
                           self.hv_dof_old,
+                          self.heta_dof_old,
+                          self.hw_dof_old,
                           self.coefficients.b.dof,
                           self.timeIntegration.u[hIndex],  # high order solution
                           self.timeIntegration.u[huIndex],
                           self.timeIntegration.u[hvIndex],
+                          self.timeIntegration.u[hetaIndex],
+                          self.timeIntegration.u[hwIndex],
                           self.low_order_hnp1,  # low order solution
                           self.low_order_hunp1,
                           self.low_order_hvnp1,
+                          self.low_order_hetanp1,
+                          self.low_order_hwnp1,
                           limited_hnp1,
                           limited_hunp1,
                           limited_hvnp1,
+                          limited_hetanp1,
+                          limited_hwnp1,
                           rowptr,  # Row indices for Sparsity Pattern (convenient for DOF loops)
                           colind,  # Column indices for Sparsity Pattern (convenient for DOF loops)
                           MassMatrix,
@@ -1027,6 +1039,8 @@ class LevelModel(proteus.Transport.OneLevelTransport):
         self.timeIntegration.u[hIndex] = limited_hnp1
         self.timeIntegration.u[huIndex] = limited_hunp1
         self.timeIntegration.u[hvIndex] = limited_hvnp1
+        self.timeIntegration.u[hetaIndex] = limited_hetanp1
+        self.timeIntegration.u[hwIndex] = limited_hwnp1
 
     def getResidual(self, u, r):
         """
@@ -1347,6 +1361,8 @@ class LevelModel(proteus.Transport.OneLevelTransport):
             self.u[0].dof,
             self.u[1].dof,
             self.u[2].dof,
+            self.u[3].dof,
+            self.u[4].dof,
             self.h_dof_sge,
             self.hu_dof_sge,
             self.hv_dof_sge,
@@ -1529,21 +1545,36 @@ class LevelModel(proteus.Transport.OneLevelTransport):
             self.coefficients.sdInfo[(2, 2)][1],
             self.coefficients.sdInfo[(2, 1)][0],
             self.coefficients.sdInfo[(2, 1)][1],
-            self.csrRowIndeces[(0, 0)],
-            self.csrColumnOffsets[(0, 0)],
-            self.csrRowIndeces[(0, 1)],
-            self.csrColumnOffsets[(0, 1)],
-            self.csrRowIndeces[(0, 2)],
-            self.csrColumnOffsets[(0, 2)],
-            self.csrRowIndeces[(1, 0)],
-            self.csrColumnOffsets[(1, 0)],
-            self.csrRowIndeces[(1, 1)],
-            self.csrColumnOffsets[(1, 1)],
-            self.csrRowIndeces[(1, 2)],
-            self.csrColumnOffsets[(1, 2)],
+            # h
+            self.csrRowIndeces[(0, 0)], self.csrColumnOffsets[(0, 0)],
+            self.csrRowIndeces[(0, 1)], self.csrColumnOffsets[(0, 1)],
+            self.csrRowIndeces[(0, 2)], self.csrColumnOffsets[(0, 2)],
+            self.csrRowIndeces[(0, 3)], self.csrColumnOffsets[(0, 3)],
+            self.csrRowIndeces[(0, 4)], self.csrColumnOffsets[(0, 4)],
+            # hu
+            self.csrRowIndeces[(1, 0)], self.csrColumnOffsets[(1, 0)],
+            self.csrRowIndeces[(1, 1)], self.csrColumnOffsets[(1, 1)],
+            self.csrRowIndeces[(1, 2)], self.csrColumnOffsets[(1, 2)],
+            self.csrRowIndeces[(1, 3)], self.csrColumnOffsets[(1, 3)],
+            self.csrRowIndeces[(1, 4)], self.csrColumnOffsets[(1, 4)],
+            # hv
             self.csrRowIndeces[(2, 0)], self.csrColumnOffsets[(2, 0)],
             self.csrRowIndeces[(2, 1)], self.csrColumnOffsets[(2, 1)],
             self.csrRowIndeces[(2, 2)], self.csrColumnOffsets[(2, 2)],
+            self.csrRowIndeces[(2, 3)], self.csrColumnOffsets[(2, 3)],
+            self.csrRowIndeces[(2, 4)], self.csrColumnOffsets[(2, 4)],
+            # heta
+            self.csrRowIndeces[(3, 0)], self.csrColumnOffsets[(3, 0)],
+            self.csrRowIndeces[(3, 1)], self.csrColumnOffsets[(3, 1)],
+            self.csrRowIndeces[(3, 2)], self.csrColumnOffsets[(3, 2)],
+            self.csrRowIndeces[(3, 3)], self.csrColumnOffsets[(3, 3)],
+            self.csrRowIndeces[(3, 4)], self.csrColumnOffsets[(3, 4)],
+            # hw
+            self.csrRowIndeces[(4, 0)], self.csrColumnOffsets[(4, 0)],
+            self.csrRowIndeces[(4, 1)], self.csrColumnOffsets[(4, 1)],
+            self.csrRowIndeces[(4, 2)], self.csrColumnOffsets[(4, 2)],
+            self.csrRowIndeces[(4, 3)], self.csrColumnOffsets[(4, 3)],
+            self.csrRowIndeces[(4, 4)], self.csrColumnOffsets[(4, 4)],
             jacobian,
             self.mesh.nExteriorElementBoundaries_global,
             self.mesh.exteriorElementBoundariesArray,

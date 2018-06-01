@@ -14,14 +14,14 @@ h2=0.11
 x0 = 2
 D = np.sqrt(g * h2)
 
-T=4.0
+T=5.0
 nDTout=100
 
 domain = RectangularDomain(L=L,x=[0,0,0])
 mannings=0.0
 
 cE=1.0
-LUMPED_MASS_MATRIX=1
+LUMPED_MASS_MATRIX=0
 LINEAR_FRICTION=1
 
 bt = domain.boundaryTags
@@ -80,14 +80,14 @@ initialConditions = {0:water_height_at_t0(),
 ##### FOR BOUNDARY CONDITIONS #####
 ###################################
 def getDBC_h(x,flag):
-    None
-    #if x[0]==0 or x[0]==L[0]:
-    #    return lambda x,t: h1
+    #None
+    if x[0]==0 or x[0]==L[0]:
+        return lambda x,t: h1
 
 def getDBC_hu(x,flag):
-    None
-    #if [0]==0 or x[0]==L[0]:
-    #    return lambda x,t: 0.
+    #None
+    if [0]==0 or x[0]==L[0]:
+        return lambda x,t: 0.
     
 def getDBC_hv(x,flag):
     return lambda x,t: 0.0
