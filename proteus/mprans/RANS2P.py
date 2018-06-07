@@ -81,6 +81,13 @@ class SubgridError(proteus.SubgridError.SGE_base):
     def calculateSubgridError(self, q):
         pass
 
+    def postAdaptUpdateSGEHistory(self,nSteps_old):
+        self.nSteps = nSteps_old
+        #once lagging has started, then lagging must continue
+        if self.lag and self.nSteps > self.nStepsToDelay:
+            logEvent("RANS2P.SubgridError: switched to lagged subgrid error")
+            self.v_last = self.cq[('velocity', 0)].copy()
+
 
 class NumericalFlux(proteus.NumericalFlux.NavierStokes_Advection_DiagonalUpwind_Diffusion_SIPG_exterior):
     hasInterior = False
@@ -137,6 +144,15 @@ class ShockCapturing(proteus.ShockCapturing.ShockCapturing_base):
             logEvent("RANS2P: max numDiff_1 %e numDiff_2 %e numDiff_3 %e" % (globalMax(self.numDiff_last[1].max()),
                                                                          globalMax(self.numDiff_last[2].max()),
                                                                          globalMax(self.numDiff_last[3].max())))
+
+    def postAdaptUpdateShockHistory(self,nSteps_old):
+        #once lagging has started, then lagging must continue, although numDiff isn't the right value post-adapt
+        self.nSteps = nSteps_old
+        if self.lag and self.nSteps > self.nStepsToDelay:
+            logEvent("RANS2P.ShockCapturing: switched to lagged shock capturing")
+            for ci in range(1, 4):
+                self.numDiff_last[ci] = self.numDiff[ci].copy()
+
 
 
 class Coefficients(proteus.TransportCoefficients.TC_base):
