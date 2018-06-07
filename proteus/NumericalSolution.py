@@ -538,6 +538,10 @@ class NS_base:  # (HasTraits):
         theMesh = mlMesh.meshList[0].subdomainMesh
         pCT = self.pList[0].ct
         nCT = self.nList[0].ct
+        try:
+            theDomain = pCT.domain
+        except AttributeError:
+            theDomain=None
         theDomain = pCT.domain
 
         if hasattr(theDomain,"PUMIMesh") and not isinstance(theDomain,Domain.PUMIDomain) :
@@ -548,8 +552,9 @@ class NS_base:  # (HasTraits):
           meshVertex2Model= [0]*theMesh.nNodes_owned
           for idx,vertex in enumerate(theDomain.vertices):
             if(pCT.nd==2 and len(vertex) == 2): #there might be a smarter way to do this
-              vertex.append(0.0) #need to make a 3D coordinate
-            closestVertex = meshVertexTree.query(vertex)
+              vertexList = [vertex[0],vertex[1]]
+              vertexList.append(0.0) #need to make a 3D coordinate
+            closestVertex = meshVertexTree.query(vertexList)
             meshVertex2Model[closestVertex[1]] = 1
 
           isModelVert = numpy.asarray(meshVertex2Model).astype("i")
@@ -911,6 +916,9 @@ class NS_base:  # (HasTraits):
                 lm.timeTerm=True
                 lm.getResidual(lu,lr)
                 lm.timeIntegration.initializeTimeHistory(resetFromDOF=True)
+                lm.stabilization.postAdaptUpdateSGEHistory(lmOld.stabilization.nSteps)
+                lm.shockCapturing.postAdaptUpdateShockHistory(lmOld.shockCapturing.nSteps)
+
                 lm.initializeTimeHistory()
                 lm.timeIntegration.initializeSpaceHistory()
                 lm.getResidual(lu,lr)
