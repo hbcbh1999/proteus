@@ -916,8 +916,7 @@ class NS_base:  # (HasTraits):
                 lm.timeTerm=True
                 lm.getResidual(lu,lr)
                 lm.timeIntegration.initializeTimeHistory(resetFromDOF=True)
-                lm.stabilization.postAdaptUpdateSGEHistory(lmOld.stabilization.nSteps)
-                lm.shockCapturing.postAdaptUpdateShockHistory(lmOld.shockCapturing.nSteps)
+                lm.postAdaptUpdate(lmOld)
 
                 lm.initializeTimeHistory()
                 lm.timeIntegration.initializeSpaceHistory()

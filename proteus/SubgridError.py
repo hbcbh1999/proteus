@@ -59,6 +59,11 @@ class SGE_base:
         \delta m^{n}/\delta t^{n+1}
         """
         pass
+    
+    def postAdaptUpdateSGEHistory(self,SGE_old):
+        pass
+
+
 class Advection_ASGS(SGE_base):
     def __init__(self,coefficients,nd,stabFlag='1',lag=False):
         SGE_base.__init__(self,coefficients,nd,lag)

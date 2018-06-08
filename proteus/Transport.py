@@ -6117,6 +6117,13 @@ class OneLevelTransport(NonlinearEquation):
                                             (isp_list[comp],
                                              isp_list[comp]))
 
+    def postAdaptUpdate(self,modelOld):
+        """
+        Give the TC object an opportunity to modify itself after adapting the mesh.
+        """
+        return {}
+
+
 #end Transport definition
 class MultilevelTransport:
     """Nonlinear ADR on a multilevel mesh"""

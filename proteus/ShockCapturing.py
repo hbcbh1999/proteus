@@ -51,6 +51,10 @@ class ShockCapturing_base:
             for ci in range(self.nc):
                 self.numDiff_last[ci][:] = self.numDiff[ci]
 
+    def postAdaptUpdateShockHistory(self,Shock_old):
+        pass
+
+
 ConstantDiffusion_SC = ShockCapturing_base
 
 class ResGrad_SC(ShockCapturing_base):

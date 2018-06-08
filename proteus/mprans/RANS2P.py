@@ -81,8 +81,8 @@ class SubgridError(proteus.SubgridError.SGE_base):
     def calculateSubgridError(self, q):
         pass
 
-    def postAdaptUpdateSGEHistory(self,nSteps_old):
-        self.nSteps = nSteps_old
+    def postAdaptUpdateSGEHistory(self,SGE_old):
+        self.nSteps = SGE_old.nSteps
         #once lagging has started, then lagging must continue
         if self.lag and self.nSteps > self.nStepsToDelay:
             logEvent("RANS2P.SubgridError: switched to lagged subgrid error")
@@ -145,9 +145,9 @@ class ShockCapturing(proteus.ShockCapturing.ShockCapturing_base):
                                                                          globalMax(self.numDiff_last[2].max()),
                                                                          globalMax(self.numDiff_last[3].max())))
 
-    def postAdaptUpdateShockHistory(self,nSteps_old):
+    def postAdaptUpdateShockHistory(self,Shock_old):
         #once lagging has started, then lagging must continue, although numDiff isn't the right value post-adapt
-        self.nSteps = nSteps_old
+        self.nSteps = Shock_old.nSteps
         if self.lag and self.nSteps > self.nStepsToDelay:
             logEvent("RANS2P.ShockCapturing: switched to lagged shock capturing")
             for ci in range(1, 4):
@@ -799,7 +799,6 @@ class Coefficients(proteus.TransportCoefficients.TC_base):
             self.forceHistory_v.flush()
             self.momentHistory.write("%21.15e %21.16e %21.16e\n" % tuple(self.netMoments[-1, :]))
             self.momentHistory.flush()
-
 
 class LevelModel(proteus.Transport.OneLevelTransport):
     nCalls = 0
@@ -2035,6 +2034,10 @@ class LevelModel(proteus.Transport.OneLevelTransport):
         self.q['velocityError'] -= self.q[('velocity', 0)]
     def updateAfterMeshMotion(self):
         pass
+
+    def postAdaptUpdate(self,modelOld):
+        self.stabilization.postAdaptUpdateSGEHistory(modelOld.stabilization)
+        self.shockCapturing.postAdaptUpdateShockHistory(modelOld.shockCapturing)
 
 
 def getErgunDrag(porosity, meanGrainSize, viscosity):
